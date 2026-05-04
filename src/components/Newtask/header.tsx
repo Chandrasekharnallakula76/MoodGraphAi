@@ -36,15 +36,17 @@ type HeaderProps = {
 
 type ProfileMenuProps = {
   compact?: boolean
+  onLogout?: () => void
 }
 
 type ActionClusterProps = {
   compact?: boolean
   onOpenNotifications: () => void
   onOpenSubscription: () => void
+  onLogout: () => void
 }
 
-function ProfileMenu({ compact = false }: ProfileMenuProps) {
+function ProfileMenu({ compact = false, onLogout }: ProfileMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -110,7 +112,10 @@ function ProfileMenu({ compact = false }: ProfileMenuProps) {
           Documentos
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-xs text-destructive focus:text-destructive">
+        <DropdownMenuItem
+          className="text-xs text-destructive focus:text-destructive"
+          onClick={onLogout}
+        >
           <LogOut className="mr-2 size-3.5" />
           Cerrar sesion
         </DropdownMenuItem>
@@ -123,6 +128,7 @@ function ActionCluster({
   compact = false,
   onOpenNotifications,
   onOpenSubscription,
+  onLogout,
 }: ActionClusterProps) {
   return (
     <div
@@ -209,7 +215,7 @@ function ActionCluster({
         <Bell className={compact ? "size-3.5" : "size-4"} />
       </Button>
 
-      <ProfileMenu compact={compact} />
+      <ProfileMenu compact={compact} onLogout={onLogout} />
     </div>
   )
 }
@@ -226,6 +232,10 @@ export function Header({ onOpenSidebar }: HeaderProps) {
 
   const openSubscriptionDialog = () => {
     setSubscriptionDialogOpen(true)
+  }
+
+  const handleLogout = () => {
+    navigate("/login", { replace: true })
   }
 
   return (
@@ -246,6 +256,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
           compact
           onOpenNotifications={openNotifications}
           onOpenSubscription={openSubscriptionDialog}
+          onLogout={handleLogout}
         />
       </div>
 
@@ -321,6 +332,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
         <ActionCluster
           onOpenNotifications={openNotifications}
           onOpenSubscription={() => setSubscriptionDialogOpen(true)}
+          onLogout={handleLogout}
         />
       </div>
       <SubscriptionPlanDialog
