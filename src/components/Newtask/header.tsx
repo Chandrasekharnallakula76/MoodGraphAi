@@ -224,6 +224,10 @@ export function Header({ onOpenSidebar }: HeaderProps) {
     navigate("/notificaciones")
   }
 
+  const openSubscriptionDialog = () => {
+    setSubscriptionDialogOpen(true)
+  }
+
   return (
     <header className="border-b border-border bg-background">
       <div className="flex h-12 items-center gap-2 px-3 md:hidden">
@@ -241,7 +245,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
         <ActionCluster
           compact
           onOpenNotifications={openNotifications}
-          onOpenSubscription={() => setSubscriptionDialogOpen(true)}
+          onOpenSubscription={openSubscriptionDialog}
         />
       </div>
 
@@ -256,10 +260,8 @@ export function Header({ onOpenSidebar }: HeaderProps) {
           <DropdownMenuContent align="start" className="w-72 p-1.5 text-xs">
             <button
               type="button"
-              onClick={() => setSelectedModel("MoodGraph 1.6 Max")}
-              className={`w-full rounded-lg px-2 py-1.5 text-left hover:bg-muted/60 ${
-                selectedModel === "MoodGraph 1.6 Max" ? "bg-muted/60" : ""
-              }`}
+              onClick={openSubscriptionDialog}
+              className="w-full rounded-lg px-2 py-1.5 text-left hover:bg-muted/60"
             >
               <div className="flex items-start justify-between">
                 <div>
@@ -275,17 +277,13 @@ export function Header({ onOpenSidebar }: HeaderProps) {
                     Agente de alto rendimiento disenado para tareas complejas.
                   </p>
                 </div>
-                {selectedModel === "MoodGraph 1.6 Max" ? (
-                  <Check className="size-3.5 text-muted-foreground" />
-                ) : null}
+                <Check className="size-3.5 text-muted-foreground opacity-0" />
               </div>
             </button>
             <button
               type="button"
-              onClick={() => setSelectedModel("MoodGraph 1.6")}
-              className={`mt-1 w-full rounded-lg px-2 py-1.5 text-left hover:bg-muted/60 ${
-                selectedModel === "MoodGraph 1.6" ? "bg-muted/60" : ""
-              }`}
+              onClick={openSubscriptionDialog}
+              className="mt-1 w-full rounded-lg px-2 py-1.5 text-left hover:bg-muted/60"
             >
               <div className="flex items-start justify-between">
                 <div>
@@ -299,9 +297,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
                     Agente versatil capaz de realizar la mayoria de las tareas.
                   </p>
                 </div>
-                {selectedModel === "MoodGraph 1.6" ? (
-                  <Check className="size-3.5 text-muted-foreground" />
-                ) : null}
+                <Check className="size-3.5 text-muted-foreground opacity-0" />
               </div>
             </button>
             <button
@@ -317,9 +313,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
                   Un agente ligero para tareas diarias.
                 </p>
               </div>
-              {selectedModel === "MoodGraph 1.6 Lite" ? (
-                <Check className="size-3.5 text-muted-foreground" />
-              ) : null}
+              <Check className="size-3.5 text-muted-foreground" />
             </button>
           </DropdownMenuContent>
         </DropdownMenu>

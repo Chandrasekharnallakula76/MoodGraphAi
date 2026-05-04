@@ -17,10 +17,6 @@ import {
   ArrowDown,
   Layers,
   ArrowUp,
-  ChevronDown,
-  Check,
-  Bot,
-  Sparkles,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -28,12 +24,6 @@ import { cn } from "@/lib/utils"
 import { ConnectorsPanel } from "@/components/Newtask/connectors-panel"
 import { FileSources } from "@/components/Newtask/file-sources"
 import { MyComputerModal } from "@/components/Newtask/my-computer-modal"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import {
   Tooltip,
   TooltipContent,
@@ -46,54 +36,39 @@ interface Message {
   content: string
 }
 
-const imageModels = [
-  {
-    id: "gpt-image-1",
-    name: "GPT-Image-1",
-    icon: Sparkles,
-    description: "Modelo estandar para crear imagenes con buena calidad.",
-  },
-  {
-    id: "nano-banana-pro",
-    name: "Nano Banana Pro",
-    icon: Image,
-    description: "Modelo avanzado para trabajos visuales mas exigentes.",
-  },
-  {
-    id: "nano-banana-2",
-    name: "Nano Banana 2",
-    icon: Bot,
-    description: "Modelo ligero y rapido para pruebas creativas.",
-  },
-]
+type SuggestionCard = {
+  icon: typeof FileText
+  text: string
+  subtext: string
+}
 
-const suggestionCards = [
-  // {
-  //   icon: FileText,
-  //   text: "Write a story about a time traveler",
-  //   subtext: "Creative writing",
-  // },
-  // {
-  //   icon: Image,
-  //   text: "Generate a futuristic city skyline",
-  //   subtext: "Image generation",
-  // },
-  // {
-  //   icon: Headphones,
-  //   text: "Summarize the latest AI podcast",
-  //   subtext: "Audio summary",
-  // },
-  // {
-  //   icon: Code,
-  //   text: "Debug this React component",
-  //   subtext: "Code assistance",
-  // },
-  // {
-  //   icon: BarChart3,
-  //   text: "Analyze Q3 sales data trends",
-  //   subtext: "Data analysis",
-  // },
-  // { icon: Mail, text: "Draft a professional email", subtext: "Email writing" },
+const suggestionCards: SuggestionCard[] = [
+  {
+    icon: FileText,
+    text: "Write a story about a time traveler",
+    subtext: "Creative writing",
+  },
+  {
+    icon: Image,
+    text: "Generate a futuristic city skyline",
+    subtext: "Image generation",
+  },
+  {
+    icon: Headphones,
+    text: "Summarize the latest AI podcast",
+    subtext: "Audio summary",
+  },
+  {
+    icon: Code,
+    text: "Debug this React component",
+    subtext: "Code assistance",
+  },
+  {
+    icon: BarChart3,
+    text: "Analyze Q3 sales data trends",
+    subtext: "Data analysis",
+  },
+  { icon: Mail, text: "Draft a professional email", subtext: "Email writing" },
 ]
 
 function ManusLogoLarge() {
@@ -242,8 +217,7 @@ function UnifiedInput({
 }) {
   const [input, setInput] = useState("")
   const [selectedConnectors] = useState<string[]>([])
-  const [isDesignMode, setIsDesignMode] = useState(true)
-  const [selectedImageModel, setSelectedImageModel] = useState(imageModels[0])
+  const isDesignMode = true
 
   const handleSend = () => {
     if (input.trim()) {
@@ -298,87 +272,6 @@ function UnifiedInput({
           <ConnectorsPanel selectedConnectors={selectedConnectors} />
 
           <MyComputerModal />
-
-          {mode === "landing" ? (
-            <>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className={cn(
-                      "h-6 gap-1 rounded-full border px-2 text-[10px] font-medium shadow-none transition-colors",
-                      isDesignMode
-                        ? "border-primary bg-primary/10 text-primary hover:bg-primary/15"
-                        : "border-border bg-muted/30 text-muted-foreground hover:bg-accent hover:text-foreground"
-                    )}
-                    onClick={() => setIsDesignMode((prev) => !prev)}
-                  >
-                    <Sparkles className="size-2.5" />
-                    Diseño
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="top">Modo de imagen</TooltipContent>
-              </Tooltip>
-
-              {isDesignMode ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="h-6 gap-1 rounded-full border border-border bg-muted/30 px-2 text-[10px] font-medium text-foreground shadow-none hover:bg-accent"
-                    >
-                      <Sparkles className="size-2.5 text-muted-foreground" />
-                      <span>{selectedImageModel.name}</span>
-                      <ChevronDown className="size-2.5 text-muted-foreground" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="start"
-                    side="top"
-                    sideOffset={8}
-                    className="w-72 p-1.5"
-                  >
-                    {imageModels.map((model) => {
-                      const Icon = model.icon
-                      const isSelected = selectedImageModel.id === model.id
-
-                      return (
-                        <DropdownMenuItem
-                          key={model.id}
-                          onClick={() => setSelectedImageModel(model)}
-                          className={cn(
-                            "flex items-start justify-between gap-3 rounded-lg px-2 py-2 text-left text-xs",
-                            isSelected && "bg-muted/70"
-                          )}
-                        >
-                          <div className="flex items-start gap-3">
-                            <div className="mt-0.5 flex size-7 items-center justify-center rounded-md bg-muted">
-                              <Icon className="size-4 text-muted-foreground" />
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-xs font-semibold">
-                                  {model.name}
-                                </span>
-                              </div>
-                              <p className="mt-0.5 max-w-52 text-[11px] leading-snug text-muted-foreground">
-                                {model.description}
-                              </p>
-                            </div>
-                          </div>
-                          {isSelected ? (
-                            <Check className="mt-0.5 size-3.5 text-muted-foreground" />
-                          ) : null}
-                        </DropdownMenuItem>
-                      )
-                    })}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : null}
-            </>
-          ) : null}
         </div>
 
         <div className="flex items-center gap-0.5">
@@ -531,7 +424,7 @@ export function ChatArea() {
       role: "user",
       content,
     }
-    setMessages([...messages, newMessage])
+    setMessages((prev) => [...prev, newMessage])
   }
 
   if (!hasStartedChat) {

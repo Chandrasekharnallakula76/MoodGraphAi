@@ -4,13 +4,6 @@ import {
   X,
   Plus,
   Loader2,
-  Globe,
-  GitBranch,
-  Mail,
-  Hexagon,
-  Camera,
-  Calendar,
-  Monitor,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -26,6 +19,7 @@ import {
 import { cn } from "@/lib/utils"
 import { ConnectorDetailModal } from "./connector-detail-modal"
 import { ConnectorsDialog } from "./connectors-dialog"
+import { ConnectorLogo } from "./connector-logo"
 
 export interface Connector {
   id: string
@@ -79,28 +73,6 @@ export const availableConnectors: Connector[] = [
     status: "disconnected",
   },
 ]
-
-function ConnectorIcon({ icon }: { icon: string }) {
-  const iconClass = "size-3"
-  switch (icon) {
-    case "github":
-      return <GitBranch className={iconClass} />
-    case "gmail":
-      return <Mail className={iconClass} />
-    case "browser":
-      return <Monitor className={iconClass} />
-    case "meta":
-      return <Hexagon className={iconClass} />
-    case "instagram":
-      return <Camera className={iconClass} />
-    case "outlook":
-      return <Mail className={iconClass} />
-    case "calendar":
-      return <Calendar className={iconClass} />
-    default:
-      return <Globe className={iconClass} />
-  }
-}
 
 interface ConnectorsPanelProps {
   selectedConnectors: string[]
@@ -210,8 +182,8 @@ export function ConnectorsPanel({
                   onClick={() => handleConnectorClick(connector)}
                   className="flex min-w-0 items-center gap-1.5 text-left"
                 >
-                  <div className="flex size-4 items-center justify-center rounded-md bg-muted">
-                    <ConnectorIcon icon={connector.icon} />
+                  <div className="flex size-5 items-center justify-center overflow-hidden rounded-md bg-muted">
+                    <ConnectorLogo icon={connector.icon} className="size-4" />
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-1">

@@ -6,6 +6,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
+import { ConnectorLogo } from "./connector-logo"
 
 type TabKey = "apps" | "api" | "mcp"
 
@@ -149,32 +150,11 @@ const apiProviders: ConnectorItem[] = [
   },
 ]
 
-const toneMap: Record<string, string> = {
-  pink: "bg-pink-500/20 text-pink-300",
-  blue: "bg-blue-500/20 text-blue-300",
-  slate: "bg-slate-500/20 text-slate-300",
-  red: "bg-red-500/20 text-red-300",
-  green: "bg-green-500/20 text-green-300",
-  sky: "bg-sky-500/20 text-sky-300",
-  amber: "bg-amber-500/20 text-amber-300",
-  violet: "bg-violet-500/20 text-violet-300",
-  emerald: "bg-emerald-500/20 text-emerald-300",
-  rose: "bg-rose-500/20 text-rose-300",
-  indigo: "bg-indigo-500/20 text-indigo-300",
-  orange: "bg-orange-500/20 text-orange-300",
-  cyan: "bg-cyan-500/20 text-cyan-300",
-}
-
 const ConnectorCard = ({ item }: { item: ConnectorItem }) => (
   <Card className="rounded-2xl border-border/80 bg-muted/25 py-0 ring-0">
     <CardContent className="flex items-start gap-3 px-4 py-3.5">
-      <div
-        className={cn(
-          "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl border border-border/70 text-[10px] font-semibold",
-          toneMap[item.tone ?? "slate"]
-        )}
-      >
-        {item.name.slice(0, 2).toUpperCase()}
+      <div className="mt-0.5 flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/70 bg-card">
+        <ConnectorLogo icon={item.id} className="size-6 object-contain" />
       </div>
       <div className="min-w-0">
         <p className="inline-flex items-center gap-2 text-sm leading-tight font-semibold text-foreground">
@@ -360,4 +340,3 @@ export function ConnectorsDialog({
     </Dialog>
   )
 }
-

@@ -230,7 +230,7 @@ export function SubscriptionPlanDialog({
 
                   {/* Dropdown only for Pro */}
                   {plan.dropdown && (
-                    <div className="py- rounded-xl border border-border/80 px-3 text-xs text-muted-foreground">
+                    <div className="rounded-xl border border-border/80 px-3 py-2 text-xs text-muted-foreground">
                       8,000 créditos / mes
                     </div>
                   )}
