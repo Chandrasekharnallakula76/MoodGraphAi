@@ -1,0 +1,547 @@
+import { useState } from "react"
+import {
+  Plus,
+  Bot,
+  Search,
+  Library,
+  FolderGit2,
+  CheckCircle2,
+  Clock,
+  MoreHorizontal,
+  ChevronDown,
+  ChevronRight,
+  PanelLeft,
+  Globe,
+  AtSign,
+  Layers,
+  SlidersHorizontal,
+  LayoutDashboard,
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
+
+// Reusable footer component for both sidebar states
+interface SidebarFooterProps {
+  isCollapsed: boolean
+  onExpand: () => void
+  onOpenSettings: () => void
+  onOpenPersonalization: () => void
+}
+
+function SidebarFooter({
+  isCollapsed,
+  onExpand,
+  onOpenSettings,
+  onOpenPersonalization,
+}: SidebarFooterProps) {
+  if (isCollapsed) {
+    return (
+      <div className="space-y-1 border-t border-border p-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-9 w-full rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+          onClick={onExpand}
+        >
+          <PanelLeft className="size-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-9 w-full rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+          onClick={onOpenSettings}
+        >
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="flex size-full items-center justify-center">
+                <SlidersHorizontal className="size-4" />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="right">Settings</TooltipContent>
+          </Tooltip>
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-9 w-full rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+          onClick={onOpenPersonalization}
+        >
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="flex size-full items-center justify-center">
+                <LayoutDashboard className="size-4" />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="right">Personalization</TooltipContent>
+          </Tooltip>
+        </Button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="border-t border-border p-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+            onClick={onOpenSettings}
+          >
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="flex size-full items-center justify-center">
+                  <SlidersHorizontal className="size-4" />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="top">Settings</TooltipContent>
+            </Tooltip>
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+            onClick={onOpenPersonalization}
+          >
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="flex size-full items-center justify-center">
+                  <LayoutDashboard className="size-4" />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="top">Personalization</TooltipContent>
+            </Tooltip>
+          </Button>
+        </div>
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Globe className="size-4" />
+          <span className="text-[11px]">from</span>
+          <AtSign className="size-4" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+interface Task {
+  id: string
+  title: string
+  status: "completed" | "in_progress" | "pending"
+  time?: string
+}
+
+interface TaskGroup {
+  id: string
+  title: string
+  tasks: Task[]
+}
+
+const taskGroups: TaskGroup[] = [
+  {
+    id: "today",
+    title: "Today",
+    tasks: [
+      {
+        id: "1",
+        title: "UI design mockups",
+        status: "completed",
+        time: "2h ago",
+      },
+      {
+        id: "2",
+        title: "Component library setup",
+        status: "in_progress",
+        time: "4h ago",
+      },
+    ],
+  },
+  {
+    id: "yesterday",
+    title: "Yesterday",
+    tasks: [
+      {
+        id: "3",
+        title: "API integration",
+        status: "completed",
+        time: "Yesterday",
+      },
+      {
+        id: "4",
+        title: "Database schema",
+        status: "completed",
+        time: "Yesterday",
+      },
+    ],
+  },
+]
+
+const allTasks: Task[] = [
+  { id: "t1", title: "Research competitors", status: "completed" },
+  { id: "t2", title: "Draft proposal", status: "in_progress" },
+]
+
+interface SidebarProps {
+  activeNav: string
+  setActiveNav: (nav: string) => void
+  onOpenSettings: (route: string) => void
+  onOpenPersonalization: (route: string) => void
+  onNavigate?: () => void
+  className?: string
+  showHeader?: boolean
+}
+
+export function Sidebar({
+  activeNav,
+  setActiveNav,
+  onOpenSettings,
+  onOpenPersonalization,
+  onNavigate,
+  className,
+  showHeader = true,
+}: SidebarProps) {
+  const [expandedGroups, setExpandedGroups] = useState<string[]>(["today"])
+  const [selectedTask, setSelectedTask] = useState("1")
+  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isLogoHovered, setIsLogoHovered] = useState(false)
+
+  const toggleGroup = (groupId: string) => {
+    setExpandedGroups((prev) =>
+      prev.includes(groupId)
+        ? prev.filter((id) => id !== groupId)
+        : [...prev, groupId]
+    )
+  }
+
+  const isExpanded = !isCollapsed
+
+  const handleNavigate = (nav: string) => {
+    setActiveNav(nav)
+    onNavigate?.()
+  }
+
+  const handleOpenSettings = (route: string) => {
+    onOpenSettings(route)
+    onNavigate?.()
+  }
+
+  const handleOpenPersonalization = (route: string) => {
+    onOpenPersonalization(route)
+    onNavigate?.()
+  }
+
+  if (!isExpanded) {
+    // Collapsed sidebar - only icons
+    return (
+      <div
+        className={cn(
+          "flex h-full w-14 flex-col border-r border-border bg-background",
+          className
+        )}
+      >
+        {showHeader ? (
+          <div
+            className="relative flex items-center justify-center p-3"
+            onMouseEnter={() => setIsLogoHovered(true)}
+            onMouseLeave={() => setIsLogoHovered(false)}
+          >
+            {isLogoHovered ? (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-8 rounded-lg bg-muted text-foreground hover:bg-accent"
+                onClick={() => {
+                  setIsCollapsed(false)
+                  setIsLogoHovered(false)
+                }}
+              >
+                <PanelLeft className="size-4" />
+              </Button>
+            ) : (
+              <div className="flex size-7 items-center justify-center rounded-lg bg-white">
+                <Layers className="size-4 text-black" />
+              </div>
+            )}
+          </div>
+        ) : null}
+
+          {/* Navigation Icons */}
+          <div className="space-y-1 px-2 py-2">
+            <button
+              onClick={() => handleNavigate("newtask")}
+              className={cn(
+                "flex w-full items-center justify-center rounded-lg p-2 transition-colors",
+                activeNav === "newtask"
+                  ? "bg-muted text-foreground"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              )}
+            >
+              <Plus className="size-4" />
+            </button>
+            <button
+              onClick={() => handleNavigate("agents")}
+              className={cn(
+                "flex w-full items-center justify-center rounded-lg p-2 transition-colors",
+                activeNav === "agents"
+                  ? "bg-muted text-foreground"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              )}
+            >
+              <Bot className="size-4" />
+            </button>
+            <button
+              onClick={() => handleNavigate("search")}
+              className={cn(
+                "flex w-full items-center justify-center rounded-lg p-2 transition-colors",
+                activeNav === "search"
+                  ? "bg-muted text-foreground"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              )}
+            >
+              <Search className="size-4" />
+            </button>
+            <button
+              onClick={() => handleNavigate("library")}
+              className={cn(
+                "flex w-full items-center justify-center rounded-lg p-2 transition-colors",
+                activeNav === "library"
+                  ? "bg-muted text-foreground"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              )}
+            >
+              <Library className="size-4" />
+            </button>
+          </div>
+
+          {/* Spacer */}
+          <div className="flex-1" />
+
+          <SidebarFooter
+            isCollapsed={true}
+            onExpand={() => setIsCollapsed(false)}
+            onOpenSettings={() => handleOpenSettings("configuracion")}
+            onOpenPersonalization={() =>
+              handleOpenPersonalization("personalizacion")
+            }
+          />
+        </div>
+    )
+  }
+
+  return (
+    <div
+      className={cn(
+        "flex h-full w-65 flex-col border-r border-border bg-background",
+        className
+      )}
+    >
+      {showHeader ? (
+        <div className="flex items-center justify-between p-3">
+          <div className="flex items-center gap-2">
+            <div className="flex size-7 items-center justify-center rounded-lg bg-white">
+              <Layers className="size-4 text-black" />
+            </div>
+            <span className="text-base font-semibold text-foreground">
+              MoodGraph AI
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+            onClick={() => setIsCollapsed(true)}
+          >
+            <PanelLeft className="size-4" />
+          </Button>
+        </div>
+      ) : null}
+
+      {!showHeader && <div className="h-3" />}
+
+        {/* Navigation */}
+        <div className="space-y-0.5 px-3 py-2">
+          <button
+            onClick={() => handleNavigate("newtask")}
+            className={cn(
+              "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs transition-colors",
+              activeNav === "newtask"
+                ? "bg-muted text-foreground"
+                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+            )}
+          >
+            <Plus className="size-4" />
+            New task
+          </button>
+          <button
+            onClick={() => handleNavigate("agents")}
+            className={cn(
+              "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs transition-colors",
+              activeNav === "agents"
+                ? "bg-muted text-foreground"
+                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+            )}
+          >
+            <Bot className="size-4" />
+            Agents
+          </button>
+          <button
+            onClick={() => handleNavigate("search")}
+            className={cn(
+              "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs transition-colors",
+              activeNav === "search"
+                ? "bg-muted text-foreground"
+                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+            )}
+          >
+            <Search className="size-4" />
+            Buscar
+          </button>
+          <button
+            onClick={() => handleNavigate("library")}
+            className={cn(
+              "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs transition-colors",
+              activeNav === "library"
+                ? "bg-muted text-foreground"
+                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+            )}
+          >
+            <Library className="size-4" />
+            Biblioteca
+          </button>
+        </div>
+
+        {/* Projects Section */}
+        <div className="px-3 py-2">
+          <div className="mb-1 flex items-center justify-between px-2">
+            <span className="text-[10px] font-medium tracking-wider text-muted-foreground uppercase">
+              Projects
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-6 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <Plus className="size-3.5" />
+            </Button>
+          </div>
+          <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground">
+            <FolderGit2 className="size-4" />
+            New project
+          </button>
+        </div>
+
+        {/* Task Groups */}
+        <ScrollArea className="h-full flex-1 overflow-hidden px-3">
+          <div className="space-y-1 py-2">
+            {/* All tasks header */}
+            <div className="mb-1 flex items-center justify-between px-2">
+              <span className="text-[10px] font-medium tracking-wider text-muted-foreground uppercase">
+                All tasks
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-6 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <MoreHorizontal className="size-3.5" />
+              </Button>
+            </div>
+
+            {taskGroups.map((group) => (
+              <div key={group.id}>
+                <button
+                  onClick={() => toggleGroup(group.id)}
+                  className="flex w-full items-center gap-2 px-2 py-1.5 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {expandedGroups.includes(group.id) ? (
+                    <ChevronDown className="size-3" />
+                  ) : (
+                    <ChevronRight className="size-3" />
+                  )}
+                  {group.title}
+                </button>
+
+                {expandedGroups.includes(group.id) && (
+                  <div className="mt-0.5 space-y-0.5">
+                    {group.tasks.map((task) => (
+                      <button
+                        key={task.id}
+                        onClick={() => setSelectedTask(task.id)}
+                        className={cn(
+                          "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left transition-colors",
+                          selectedTask === task.id
+                            ? "bg-muted"
+                            : "hover:bg-muted/50"
+                        )}
+                      >
+                        {task.status === "completed" ? (
+                          <CheckCircle2 className="size-4 shrink-0 text-primary" />
+                        ) : (
+                          <div className="size-4 shrink-0 rounded-full border-2 border-border" />
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p
+                            className={cn(
+                              "truncate text-xs",
+                              selectedTask === task.id
+                                ? "text-foreground"
+                                : "text-muted-foreground",
+                              task.status === "completed" &&
+                                "text-muted-foreground/70"
+                            )}
+                          >
+                            {task.title}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {/* Recent tasks list */}
+            <div className="mt-2 space-y-0.5">
+              {allTasks.map((task) => (
+                <button
+                  key={task.id}
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left transition-colors hover:bg-muted/50"
+                >
+                  {task.status === "completed" ? (
+                    <CheckCircle2 className="size-4 shrink-0 text-primary" />
+                  ) : (
+                    <Clock className="size-4 shrink-0 text-chart-3" />
+                  )}
+                  <span
+                    className={cn(
+                      "text-xs",
+                      task.status === "completed"
+                        ? "text-muted-foreground/70"
+                        : "text-muted-foreground"
+                    )}
+                  >
+                    {task.title}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </ScrollArea>
+
+        <SidebarFooter
+          isCollapsed={false}
+          onExpand={() => setIsCollapsed(false)}
+          onOpenSettings={() => handleOpenSettings("configuracion")}
+          onOpenPersonalization={() =>
+            handleOpenPersonalization("personalizacion")
+          }
+        />
+      </div>
+  )
+}
