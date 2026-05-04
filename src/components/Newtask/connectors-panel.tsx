@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { ConnectorDetailModal } from "./connector-detail-modal"
+import { ConnectorsDialog } from "./connectors-dialog"
 
 export interface Connector {
   id: string
@@ -109,6 +110,7 @@ export function ConnectorsPanel({
   selectedConnectors,
 }: ConnectorsPanelProps) {
   const [open, setOpen] = useState(false)
+  const [isConnectorsDialogOpen, setIsConnectorsDialogOpen] = useState(false)
   const [selectedConnector, setSelectedConnector] = useState<Connector | null>(
     null
   )
@@ -268,7 +270,14 @@ export function ConnectorsPanel({
             ))}
           </div>
           <div className="border-t border-border px-3 py-1.5">
-            <button className="flex items-center gap-2 text-[11px] text-muted-foreground transition-colors hover:text-foreground">
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false)
+                setIsConnectorsDialogOpen(true)
+              }}
+              className="flex items-center gap-2 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+            >
               <Plus className="size-2.5 cursor-pointer" />
               <span>Add connectors</span>
               <span className="ml-auto flex items-center gap-1">
@@ -280,6 +289,11 @@ export function ConnectorsPanel({
           </div>
         </PopoverContent>
       </Popover>
+
+      <ConnectorsDialog
+        open={isConnectorsDialogOpen}
+        onOpenChange={setIsConnectorsDialogOpen}
+      />
 
       <ConnectorDetailModal
         connector={selectedConnector}
