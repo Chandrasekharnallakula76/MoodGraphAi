@@ -1,7 +1,15 @@
-import type { FormEvent } from "react"
+import { useState, type FormEvent } from "react"
 import { useNavigate } from "react-router-dom"
 
-import { ArrowRight, Lock, Mail, Sparkles, User } from "lucide-react"
+import {
+  ArrowRight,
+  Eye,
+  EyeOff,
+  Lock,
+  Mail,
+  Sparkles,
+  User,
+} from "lucide-react"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -25,6 +33,7 @@ type RegisterPageProps = {
 
 const RegisterPage = ({ defaultTab }: RegisterPageProps) => {
   const navigate = useNavigate()
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleAuthSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -163,12 +172,27 @@ const RegisterPage = ({ defaultTab }: RegisterPageProps) => {
                           <Input
                             id="register-password"
                             name="password"
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             autoComplete="new-password"
                             placeholder="Create a secure password"
                             required
-                            className="h-11 pl-9"
+                            className="h-11 pl-9 pr-10"
                           />
+
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword((prev) => !prev)}
+                            className="absolute top-1/2 right-3 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                            aria-label={
+                              showPassword ? "Hide password" : "Show password"
+                            }
+                          >
+                            {showPassword ? (
+                              <EyeOff className="size-4" />
+                            ) : (
+                              <Eye className="size-4" />
+                            )}
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -219,12 +243,27 @@ const RegisterPage = ({ defaultTab }: RegisterPageProps) => {
                         <Input
                           id="login-password"
                           name="password"
-                          type="password"
+                          type={showPassword ? "text" : "password"}
                           autoComplete="current-password"
                           placeholder="Enter your password"
                           required
-                          className="h-11 pl-9"
+                          className="h-11 pl-9 pr-10"
                         />
+
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((prev) => !prev)}
+                          className="absolute top-1/2 right-3 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                          aria-label={
+                            showPassword ? "Hide password" : "Show password"
+                          }
+                        >
+                          {showPassword ? (
+                            <EyeOff className="size-4" />
+                          ) : (
+                            <Eye className="size-4" />
+                          )}
+                        </button>
                       </div>
                     </div>
 
