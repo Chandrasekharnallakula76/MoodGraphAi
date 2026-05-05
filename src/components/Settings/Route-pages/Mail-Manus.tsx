@@ -31,7 +31,7 @@ const MailManus = () => {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-4">
       {/* Header */}
-      <h1 className="text-xl font-semibold">Correo MoodGraph</h1>
+      <h1 className="text-xl font-semibold">Correo Daisy AI Studio</h1>
 
       {/* Tabs */}
       <div className="mt-4 flex gap-6 border-b">
@@ -56,7 +56,7 @@ const MailManus = () => {
           {/* Email section */}
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-base font-semibold">Correo de MoodGraph</h2>
+              <h2 className="text-base font-semibold">Correo de Daisy AI Studio</h2>
               <p className="text-sm text-muted-foreground">
                 Envia correos para crear tareas
               </p>
@@ -66,7 +66,7 @@ const MailManus = () => {
               onClick={() => setEditOpen(true)}
               className="flex items-center gap-2 text-sm"
             >
-              nallakulasekhar9999174@moodgraph.bot
+              nallakulasekhar9999174@daisy.ai
               <Pencil className="size-4" />
             </button>
           </div>
@@ -162,7 +162,7 @@ const MailManus = () => {
         <DialogContent className="rounded-2xl sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              Editar la dirección de correo de MoodGraph
+              Editar la dirección de correo de Daisy AI Studio
             </DialogTitle>
           </DialogHeader>
 
@@ -170,7 +170,7 @@ const MailManus = () => {
             <div className="flex items-center rounded-lg border px-3 py-2">
               <Input defaultValue="nallakulasekhar9999174" />
               <span className="ml-2 text-sm text-muted-foreground">
-                @moodgraph.bot
+                @daisy.ai
               </span>
             </div>
 
@@ -212,7 +212,7 @@ const MailManus = () => {
                   placeholder="newsletter"
                   className="h-full border-0 px-2 text-sm focus-visible:ring-0"
                 />
-                <span className="opacity-70">@moodgraph.bot</span>
+                <span className="opacity-70">@daisy.ai</span>
               </div>
             </div>
 
@@ -221,7 +221,7 @@ const MailManus = () => {
               <label className="text-sm font-medium">Instrucciones</label>
 
               <p className="text-xs text-muted-foreground">
-                Los correos enviados a nallakulasekhar9999174-@moodgraph.bot
+                Los correos enviados a nallakulasekhar9999174@daisy.ai
                 crearán tareas con la siguiente indicación.
               </p>
 

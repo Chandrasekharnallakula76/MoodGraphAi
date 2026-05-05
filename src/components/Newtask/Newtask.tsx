@@ -147,7 +147,7 @@ const Newtask = () => {
                   <Layers className="size-4 text-black" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold">MoodGraph AI</p>
+                  <p className="text-sm font-semibold">Daisy AI Studio</p>
                   <p className="text-[11px] text-muted-foreground">
                     Workspace menu
                   </p>

@@ -35,7 +35,10 @@ const Settingsroutes = () => {
           path="/settings/tareas-programadas"
           element={<TareasProgramadas />}
         />
-        <Route path="/settings/correo-moodgraph" element={<MailManus />} />
+        <Route
+          path="/settings/correo-daisy-ai-studio"
+          element={<MailManus />}
+        />
         <Route path="/settings/controles-datos" element={<CorreoManus />} />
         <Route path="/settings/navegador-nube" element={<CloudBrowser />} />
         <Route path="/settings/mi-computadora" element={<MyComputer />} />

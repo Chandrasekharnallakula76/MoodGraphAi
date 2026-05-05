@@ -348,7 +348,7 @@ export function Sidebar({
               <Layers className="size-4 text-black" />
             </div>
             <span className="text-base font-semibold text-foreground">
-              MoodGraph AI
+              Daisy AI Studio
             </span>
           </div>
           <Button

@@ -32,7 +32,11 @@ const menuItems = [
   { label: "Configuración", icon: Settings, path: "/settings/configuracion" },
   { label: "Uso", icon: BarChart3, path: "/settings/uso" },
   { label: "Tareas programadas", icon: Calendar, path: "/settings/tareas-programadas" },
-  { label: "Correo MoodGraph", icon: Mail, path: "/settings/correo-moodgraph" },
+  {
+    label: "Correo Daisy AI Studio",
+    icon: Mail,
+    path: "/settings/correo-daisy-ai-studio",
+  },
   { label: "Controles de datos", icon: Database, path: "/settings/controles-datos" },
   { label: "Navegador en la nube", icon: Cloud, path: "/settings/navegador-nube" },
   { label: "Mi computadora", icon: Monitor, path: "/settings/mi-computadora" },

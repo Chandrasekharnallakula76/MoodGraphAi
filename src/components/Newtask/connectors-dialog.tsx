@@ -77,7 +77,7 @@ const appConnectors: ConnectorItem[] = [
   {
     id: "google-tasks",
     name: "Google Tasks",
-    desc: "Crea y administra tareas desde MoodGraph.",
+    desc: "Crea y administra tareas desde Daisy AI Studio.",
     tone: "blue",
   },
   {
@@ -89,7 +89,7 @@ const appConnectors: ConnectorItem[] = [
   {
     id: "google-drive",
     name: "Google Drive",
-    desc: "Access files and let MoodGraph help you manage documents.",
+    desc: "Access files and let Daisy AI Studio help you manage documents.",
     tone: "green",
   },
   {
@@ -367,7 +367,7 @@ export function ConnectorsDialog({
                 <Card className="rounded-2xl border-border/80 bg-muted/25 py-0 ring-0">
                   <CardContent className="inline-flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground">
                     <Plug className="size-4" />
-                    Conecte MoodGraph a cualquier servicio de terceros
+                    Conecte Daisy AI Studio a cualquier servicio de terceros
                     utilizando sus propias claves API.
                   </CardContent>
                 </Card>

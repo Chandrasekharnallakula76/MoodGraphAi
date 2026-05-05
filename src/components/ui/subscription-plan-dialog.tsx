@@ -134,7 +134,7 @@ export function SubscriptionPlanDialog({
       <DialogContent className="h-[90vh] overflow-y-auto rounded-3xl border border-border bg-background p-6 sm:max-w-6xl">
         <DialogHeader className="text-center">
           <DialogTitle className="text-lg font-semibold tracking-tight">
-            Actualiza a MoodGraph Pro
+            Actualiza a Daisy AI Studio Pro
           </DialogTitle>
         </DialogHeader>
 

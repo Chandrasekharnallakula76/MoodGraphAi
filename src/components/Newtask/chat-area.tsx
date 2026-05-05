@@ -97,7 +97,7 @@ function ManusLogoLarge() {
         <Layers className="size-5 text-foreground" />
       </div>
       <span className="text-2xl font-semibold tracking-tight text-foreground">
-        MoodGraph AI
+        Daisy AI Studio
       </span>
       <span className="rounded-md border border-border bg-muted px-2 py-1 text-sm text-muted-foreground">
         Lite
@@ -113,7 +113,7 @@ function ManusLogo() {
         <Layers className="size-3.5 text-foreground" />
       </div>
       <span className="text-sm font-semibold tracking-tight text-foreground">
-        MoodGraph AI
+        Daisy AI Studio
       </span>
       <span className="rounded-md border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[11px] font-medium text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
         Lite
@@ -523,7 +523,7 @@ function ContinueNotice() {
     <div className="flex items-center gap-2 py-3 text-muted-foreground">
       <Pause className="size-4" />
       <span className="text-sm">
-        MoodGraph AI will continue working after your reply
+        Daisy AI Studio will continue working after your reply
       </span>
     </div>
   )
@@ -575,7 +575,7 @@ function UnifiedInput({
             ? "ask anything, I’ll generate it for you"
             : mode === "landing"
               ? "Ask anything..."
-              : "Send message to MoodGraph AI..."
+              : "Send message to Daisy AI Studio..."
         }
         rows={1}
         className={cn(

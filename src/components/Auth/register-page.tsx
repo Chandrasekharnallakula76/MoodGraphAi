@@ -169,7 +169,7 @@ const RegisterPage = ({ defaultTab }: RegisterPageProps) => {
                   </div>
 
                   <div>
-                    <CardTitle className="text-lg">MoodGraph AI</CardTitle>
+                    <CardTitle className="text-lg">Daisy AI Studio</CardTitle>
 
                     <CardDescription className="text-sm">
                       Secure access to your workspace.
@@ -191,14 +191,14 @@ const RegisterPage = ({ defaultTab }: RegisterPageProps) => {
 
                 <p className="max-w-md text-sm leading-6 text-muted-foreground">
                   {defaultTab === "register"
-                    ? "Set up your profile in a few quick steps and start using MoodGraph AI."
+                    ? "Set up your profile in a few quick steps and start using Daisy AI Studio."
                     : "Sign in with your email and password to continue to your workspace."}
                 </p>
               </div>
 
               <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1 text-xs text-muted-foreground shadow-sm backdrop-blur">
                 <Sparkles className="size-3.5 text-primary" />
-                MoodGraph AI access
+                Daisy AI Studio access
               </div>
             </CardHeader>
 

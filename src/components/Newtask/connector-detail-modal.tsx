@@ -14,22 +14,22 @@ interface ConnectorDetailModalProps {
 
 const connectorDescriptions: Record<string, string> = {
   github:
-    "Access, search, and organize repos, track issues, review pull requests, and automate workflows directly in MoodGraph.",
+    "Access, search, and organize repos, track issues, review pull requests, and automate workflows directly in Daisy AI Studio.",
   gmail:
-    "Send, read, and manage emails from your Gmail account directly in MoodGraph.",
+    "Send, read, and manage emails from your Gmail account directly in Daisy AI Studio.",
   browser:
     "Access your browser data, bookmarks, and history to enhance your workflow.",
   "google-tasks":
-    "Create, organize, and manage Google Tasks directly from MoodGraph.",
-  meta: "Manage Meta Ads campaigns, view analytics, and optimize your advertising directly in MoodGraph.",
+    "Create, organize, and manage Google Tasks directly from Daisy AI Studio.",
+  meta: "Manage Meta Ads campaigns, view analytics, and optimize your advertising directly in Daisy AI Studio.",
   instagram:
-    "Schedule posts, view insights, and manage your Instagram presence from MoodGraph.",
+    "Schedule posts, view insights, and manage your Instagram presence from Daisy AI Studio.",
   outlook:
-    "Send, read, and manage emails from your Outlook account directly in MoodGraph.",
+    "Send, read, and manage emails from your Outlook account directly in Daisy AI Studio.",
   "google-calendar":
-    "View, create, and manage events in your Google Calendar from MoodGraph.",
+    "View, create, and manage events in your Google Calendar from Daisy AI Studio.",
   ocalendar:
-    "View, create, and manage events in your Outlook Calendar from MoodGraph.",
+    "View, create, and manage events in your Outlook Calendar from Daisy AI Studio.",
 }
 
 const connectorMetadata: Record<
@@ -44,63 +44,63 @@ const connectorMetadata: Record<
 > = {
   github: {
     type: "App",
-    author: "MoodGraph",
+    author: "Daisy AI Studio",
     uuid: "github-conn-001",
     website: "https://github.com",
     privacyPolicy: "https://github.com/privacy",
   },
   gmail: {
     type: "App",
-    author: "MoodGraph",
+    author: "Daisy AI Studio",
     uuid: "gmail-conn-001",
     website: "https://gmail.com",
     privacyPolicy: "https://policies.google.com/privacy",
   },
   browser: {
     type: "Extension",
-    author: "MoodGraph",
+    author: "Daisy AI Studio",
     uuid: "browser-conn-001",
     website: "https://manus.im",
     privacyPolicy: "https://manus.im/privacy",
   },
   meta: {
     type: "App",
-    author: "MoodGraph",
+    author: "Daisy AI Studio",
     uuid: "meta-conn-001",
     website: "https://business.facebook.com",
     privacyPolicy: "https://www.facebook.com/privacy/policy",
   },
   instagram: {
     type: "App",
-    author: "MoodGraph",
+    author: "Daisy AI Studio",
     uuid: "instagram-conn-001",
     website: "https://instagram.com",
     privacyPolicy: "https://help.instagram.com/519522125107875",
   },
   outlook: {
     type: "App",
-    author: "MoodGraph",
+    author: "Daisy AI Studio",
     uuid: "outlook-conn-001",
     website: "https://outlook.com",
     privacyPolicy: "https://privacy.microsoft.com",
   },
   "google-calendar": {
     type: "App",
-    author: "MoodGraph",
+    author: "Daisy AI Studio",
     uuid: "gcal-conn-001",
     website: "https://calendar.google.com",
     privacyPolicy: "https://policies.google.com/privacy",
   },
   "google-tasks": {
     type: "App",
-    author: "MoodGraph",
+    author: "Daisy AI Studio",
     uuid: "gtasks-conn-001",
     website: "https://tasks.google.com",
     privacyPolicy: "https://policies.google.com/privacy",
   },
   ocalendar: {
     type: "App",
-    author: "MoodGraph",
+    author: "Daisy AI Studio",
     uuid: "ocal-conn-001",
     website: "https://outlook.com/calendar",
     privacyPolicy: "https://privacy.microsoft.com",
@@ -140,7 +140,7 @@ function ConnectorDetailModalContent({
 
   const description =
     connectorDescriptions[connector.id] ||
-    `Connect to ${connector.name} to enhance your workflow in MoodGraph.`
+    `Connect to ${connector.name} to enhance your workflow in Daisy AI Studio.`
   const metadata = connectorMetadata[connector.id]
 
   const isConnected = connector.status === "connected"

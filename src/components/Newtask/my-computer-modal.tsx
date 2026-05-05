@@ -80,7 +80,7 @@ export function MyComputerModal() {
             My Computer
           </h3>
           <p className="mt-1 text-xs text-muted-foreground">
-            Download the desktop app to grant MoodGraph access to your computer.
+            Download the desktop app to grant Daisy AI Studio access to your computer.
           </p>
 
           <Button

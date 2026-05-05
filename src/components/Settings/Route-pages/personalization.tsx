@@ -23,7 +23,7 @@ const Personalization = () => {
           Personalización
         </h1>
         <p className="text-xs text-muted-foreground">
-          Administra quién eres y qué recuerda MoodGraph
+          Administra quién eres y qué recuerda Daisy AI Studio
         </p>
       </section>
 

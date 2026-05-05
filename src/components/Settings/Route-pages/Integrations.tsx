@@ -28,19 +28,19 @@ type IntegrationHeaderProps = {
 const integrationCards: IntegrationCardProps[] = [
   {
     icon: <Plug className="size-4 text-cyan-200" />,
-    title: "Construye con la API de MoodGraph",
-    desc: "Usa la API de MoodGraph para crear integraciones personalizadas",
+    title: "Construye con la API de Daisy AI Studio",
+    desc: "Usa la API de Daisy AI Studio para crear integraciones personalizadas",
     onClick: () => {},
   },
   {
     icon: <Zap className="size-4 text-orange-400" />,
-    title: "Usa MoodGraph en Zapier",
-    desc: "Conecta MoodGraph con miles de aplicaciones",
+    title: "Usa Daisy AI Studio en Zapier",
+    desc: "Conecta Daisy AI Studio con miles de aplicaciones",
     onClick: () => {},
   },
   {
     icon: <MessageSquare className="size-4 text-violet-400" />,
-    title: "Usar MoodGraph en Slack",
+    title: "Usar Daisy AI Studio en Slack",
     desc: "Asigna tareas desde Slack",
     onClick: () => {},
   },
@@ -133,11 +133,11 @@ const Integrations = () => {
           <div className="grid gap-4 sm:grid-cols-2">
             {integrationCards.map((item) => {
               const targetView: ViewType =
-                item.title === "Construye con la API de MoodGraph"
+                item.title === "Construye con la API de Daisy AI Studio"
                   ? "api"
-                  : item.title === "Usa MoodGraph en Zapier"
+                  : item.title === "Usa Daisy AI Studio en Zapier"
                     ? "zapier"
-                    : item.title === "Usar MoodGraph en Slack"
+                    : item.title === "Usar Daisy AI Studio en Slack"
                       ? "slack"
                       : item.title === "Telegram"
                         ? "telegram"
@@ -165,7 +165,7 @@ const Integrations = () => {
             <div className="rounded-xl border border-border p-4">
               <p className="text-xs font-medium sm:text-xs">Claves API</p>
               <p className="text-[10px] text-muted-foreground sm:text-xs">
-                Gestiona claves API para acceder a MoodGraph
+                Gestiona claves API para acceder a Daisy AI Studio
               </p>
             </div>
 
@@ -205,7 +205,7 @@ const Integrations = () => {
             <div className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-xs font-medium sm:text-xs">
-                  Usa MoodGraph en Zapier
+                  Usa Daisy AI Studio en Zapier
                 </p>
                 <p className="text-[10px] text-muted-foreground sm:text-xs">
                   Conecta con miles de apps
@@ -234,7 +234,7 @@ const Integrations = () => {
 
           <div className="space-y-4">
             <div className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-xs sm:text-xs">Usar MoodGraph en Slack</p>
+              <p className="text-xs sm:text-xs">Usar Daisy AI Studio en Slack</p>
               <Button
                 variant="outline"
                 size="sm"

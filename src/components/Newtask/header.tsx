@@ -50,6 +50,7 @@ type ActionClusterProps = {
 function ProfileMenu({ compact = false, onLogout }: ProfileMenuProps) {
   const email = getStoredEmail() ?? "nallakulasekhar9999@gmail.com"
   const name = email.split("@")[0] || "Chandrasekhar"
+  const initial = (name.trim().charAt(0) || email.trim().charAt(0) || "C").toUpperCase()
 
   return (
     <DropdownMenu>
@@ -62,7 +63,7 @@ function ProfileMenu({ compact = false, onLogout }: ProfileMenuProps) {
           }
         >
           <Avatar className={compact ? "size-6" : "size-7"}>
-            <AvatarFallback>C</AvatarFallback>
+            <AvatarFallback>{initial}</AvatarFallback>
           </Avatar>
           <ChevronDown
             className={
@@ -223,7 +224,7 @@ function ActionCluster({
 }
 
 export function Header({ onOpenSidebar }: HeaderProps) {
-  const [selectedModel, setSelectedModel] = useState("MoodGraph 1.6 Lite")
+  const [selectedModel, setSelectedModel] = useState("Daisy AI Studio 1.6 Lite")
   const [subscriptionDialogOpen, setSubscriptionDialogOpen] = useState(false)
 
   const navigate = useNavigate()
@@ -281,7 +282,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
                 <div>
                   <div className="inline-flex items-center gap-1">
                     <span className="text-xs font-semibold">
-                      MoodGraph 1.6 Max
+                      Daisy AI Studio 1.6 Max
                     </span>
                     <span className="rounded bg-primary/20 px-1 py-0.5 text-[10px] text-primary">
                       Pro
@@ -302,7 +303,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
               <div className="flex items-start justify-between">
                 <div>
                   <div className="inline-flex items-center gap-1">
-                    <span className="text-xs font-semibold">MoodGraph 1.6</span>
+                    <span className="text-xs font-semibold">Daisy AI Studio 1.6</span>
                     <span className="rounded bg-primary/20 px-1 py-0.5 text-[10px] text-primary">
                       Pro
                     </span>
@@ -316,13 +317,13 @@ export function Header({ onOpenSidebar }: HeaderProps) {
             </button>
             <button
               type="button"
-              onClick={() => setSelectedModel("MoodGraph 1.6 Lite")}
+              onClick={() => setSelectedModel("Daisy AI Studio 1.6 Lite")}
               className={`mt-1 flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left hover:bg-muted ${
-                selectedModel === "MoodGraph 1.6 Lite" ? "bg-muted/60" : ""
+                selectedModel === "Daisy AI Studio 1.6 Lite" ? "bg-muted/60" : ""
               }`}
             >
               <div>
-                <p className="text-xs font-semibold">MoodGraph 1.6 Lite</p>
+                <p className="text-xs font-semibold">Daisy AI Studio 1.6 Lite</p>
                 <p className="mt-1 text-[11px] text-muted-foreground">
                   Un agente ligero para tareas diarias.
                 </p>

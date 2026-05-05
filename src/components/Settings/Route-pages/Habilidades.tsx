@@ -44,7 +44,7 @@ const initialSkills: SkillItem[] = [
     id: "skill-creator",
     name: "skill-creator",
     description:
-      "Guia para crear o actualizar habilidades que extienden MoodGraph a traves de conocimientos especializados y flujos reutilizables.",
+      "Guia para crear o actualizar habilidades que extienden Daisy AI Studio a traves de conocimientos especializados y flujos reutilizables.",
     updatedAt: "Actualizado el 16 feb 2026",
     enabled: true,
   },

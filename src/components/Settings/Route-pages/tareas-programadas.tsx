@@ -105,7 +105,7 @@ const TareasProgramadas = () => {
           <div className="flex min-h-[360px] flex-col items-center justify-center gap-3 px-4 text-center">
             <CalendarDays className="size-8 text-muted-foreground/70" />
             <p className="max-w-sm text-base text-muted-foreground">
-              Programa tareas futuras y deja que MoodGraph gestione tu rutina.
+              Programa tareas futuras y deja que Daisy AI Studio gestione tu rutina.
             </p>
 
             <Button
@@ -289,7 +289,7 @@ const TareasProgramadas = () => {
               <div className="flex items-center justify-between rounded-xl border border-border px-4 py-3 text-sm">
                 <span>Configuraciones avanzadas</span>
                 <span className="text-muted-foreground">
-                  MoodGraph 1.6 Lite · Siempre preguntar
+                  Daisy AI Studio 1.6 Lite · Siempre preguntar
                 </span>
               </div>
 

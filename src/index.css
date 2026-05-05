@@ -162,7 +162,7 @@
 }
 
 /* ========================================
-   GREEN THEME - Dark Mode (Teal/Cyan like MoodGraph)
+   GREEN THEME - Dark Mode (Teal/Cyan like Daisy AI Studio)
    ======================================== */
 [data-color-theme="green"].dark {
     --background: oklch(0.08 0.02 195);

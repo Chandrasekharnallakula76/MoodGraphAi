@@ -10,7 +10,7 @@ const CloudBrowser = () => {
       <header className="space-y-1">
         <h2 className="text-lg font-semibold">Navegador en la nube</h2>
         <p className="text-sm text-muted-foreground">
-          Configura como MoodGraph conserva sesiones y datos del navegador entre
+          Configura como Daisy AI Studio conserva sesiones y datos del navegador entre
           tareas.
         </p>
       </header>

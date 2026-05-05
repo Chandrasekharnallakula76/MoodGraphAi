@@ -19,7 +19,7 @@ const Conectores = () => {
           <Plug className="size-6" />
         </div>
         <p className="text-base text-muted-foreground">
-          Conecta MoodGraph con tus aplicaciones diarias, APIs y MCPs
+          Conecta Daisy AI Studio con tus aplicaciones diarias, APIs y MCPs
         </p>
         <Button
           variant="outline"
@@ -37,4 +37,3 @@ const Conectores = () => {
 }
 
 export default Conectores
-
