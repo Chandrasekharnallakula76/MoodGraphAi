@@ -23,6 +23,12 @@ export type ChatAssistantResponse =
       kind: "email_list"
       emails: ChatEmailItem[]
     }
+  | {
+      kind: "email_reply"
+      reply: string
+      approvalRequired?: boolean
+      nextStep?: string
+    }
 
 const chatClient = axios.create({
   baseURL: apiBaseUrl,
@@ -93,10 +99,24 @@ function extractChatContent(data: unknown): ChatAssistantResponse {
     }
   }
 
+  if (typeof response.reply === "string" && response.reply.trim()) {
+    return {
+      kind: "email_reply",
+      reply: response.reply,
+      approvalRequired:
+        typeof response.approval_required === "boolean"
+          ? response.approval_required
+          : undefined,
+      nextStep:
+        typeof response.next_step === "string" && response.next_step.trim()
+          ? response.next_step
+          : undefined,
+    }
+  }
+
   const candidates = [
     response.response,
     response.message,
-    response.reply,
     response.answer,
     response.output,
     response.data,

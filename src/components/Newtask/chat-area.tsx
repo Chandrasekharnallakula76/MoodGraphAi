@@ -310,6 +310,23 @@ function EmailReplyPreview({ text }: { text: string }) {
   )
 }
 
+function EmailReplyStatus({
+  approvalRequired,
+  nextStep,
+}: {
+  approvalRequired?: boolean
+  nextStep?: string
+}) {
+  if (!approvalRequired && !nextStep) return null
+
+  return (
+    <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200">
+      <p className="font-medium">Approval required</p>
+      {nextStep ? <p className="mt-1 text-amber-900/80 dark:text-amber-200/80">{nextStep}</p> : null}
+    </div>
+  )
+}
+
 function AssistantMessage({
   content,
   isPending = false,
@@ -321,12 +338,15 @@ function AssistantMessage({
 }) {
   const [copied, setCopied] = useState(false)
   const isEmailList = typeof content === "object" && content.kind === "email_list"
+  const isEmailReply = typeof content === "object" && content.kind === "email_reply"
   const textContent =
     typeof content === "string"
       ? content
       : content.kind === "text"
         ? content.text
-        : ""
+        : content.kind === "email_reply"
+          ? content.reply
+          : ""
 
   const handleCopy = async () => {
     if (onCopy) {
@@ -342,12 +362,14 @@ function AssistantMessage({
           ? content
           : content.kind === "text"
             ? content.text
-            : content.emails
-                .map(
-                  (email) =>
-                    `${email.index}. ${email.subject}\nFrom: ${email.from}\nDate: ${formatEmailDate(email.date)}\n${email.snippet}`
-                )
-                .join("\n\n")
+            : content.kind === "email_reply"
+              ? content.reply
+              : content.emails
+                  .map(
+                    (email) =>
+                      `${email.index}. ${email.subject}\nFrom: ${email.from}\nDate: ${formatEmailDate(email.date)}\n${email.snippet}`
+                  )
+                  .join("\n\n")
 
       await navigator.clipboard.writeText(copyText)
       setCopied(true)
@@ -435,6 +457,12 @@ function AssistantMessage({
                 )}
               >
                 <EmailReplyPreview text={textContent} />
+                {isEmailReply ? (
+                  <EmailReplyStatus
+                    approvalRequired={content.approvalRequired}
+                    nextStep={content.nextStep}
+                  />
+                ) : null}
               </div>
             )}
           </div>
