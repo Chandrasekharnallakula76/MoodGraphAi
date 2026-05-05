@@ -1,15 +1,9 @@
-import { useEffect, useRef, useState } from "react"
-import { X, Plus, ChevronDown, Loader2, Copy, ExternalLink } from "lucide-react"
+import { useState } from "react"
+import { X, Plus, ChevronDown, Copy, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { openConnectorConnectUrl } from "@/apis/connectors/list"
+import { connectorApiKeyMap, type Connector } from "./connectors-data"
 import { ConnectorLogo } from "./connector-logo"
-
-interface Connector {
-  id: string
-  name: string
-  icon: string
-  status: "connected" | "disconnected" | "install"
-  beta?: boolean
-}
 
 interface ConnectorDetailModalProps {
   connector: Connector | null
@@ -143,41 +137,24 @@ function ConnectorDetailModalContent({
   onConnect,
 }: ConnectorDetailModalContentProps) {
   const [showDetails, setShowDetails] = useState(false)
-  const [localStatus, setLocalStatus] = useState<
-    "connected" | "disconnected" | "install"
-  >(connector.status)
-  const [isConnecting, setIsConnecting] = useState(false)
-  const connectTimerRef = useRef<number | null>(null)
-
-  useEffect(() => {
-    return () => {
-      if (connectTimerRef.current) {
-        window.clearTimeout(connectTimerRef.current)
-      }
-    }
-  }, [])
 
   const description =
     connectorDescriptions[connector.id] ||
     `Connect to ${connector.name} to enhance your workflow in MoodGraph.`
   const metadata = connectorMetadata[connector.id]
 
-  const isConnected = localStatus === "connected"
+  const isConnected = connector.status === "connected"
 
   const handleConnect = () => {
-    if (isConnected || localStatus === "install" || isConnecting) return
+    if (isConnected || connector.status === "install") return
 
-    if (connectTimerRef.current) {
-      window.clearTimeout(connectTimerRef.current)
-    }
+    const apiKey = connectorApiKeyMap[connector.id]
+    if (!apiKey) return
 
-    setIsConnecting(true)
-    connectTimerRef.current = window.setTimeout(() => {
-      setIsConnecting(false)
-      setLocalStatus("connected")
+    const opened = openConnectorConnectUrl(apiKey)
+    if (opened) {
       onConnect(connector.id)
-      connectTimerRef.current = null
-    }, 650)
+    }
   }
 
   const handleCopyUUID = () => {
@@ -219,14 +196,9 @@ function ConnectorDetailModalContent({
             onClick={handleConnect}
             variant="outline"
             className="h-9 gap-2 rounded-full border-border bg-background px-4 text-xs font-medium hover:bg-accent"
-            disabled={localStatus === "install" || isConnected || isConnecting}
+            disabled={connector.status === "install" || isConnected}
           >
-            {isConnecting ? (
-              <>
-                <Loader2 className="size-3.5 animate-spin" />
-                Loading
-              </>
-            ) : isConnected ? (
+            {isConnected ? (
               <>
                 <span className="size-2 rounded-full bg-emerald-400" />
                 Connected

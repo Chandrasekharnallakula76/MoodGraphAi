@@ -1,11 +1,7 @@
-import { useEffect, useRef, useState } from "react"
-import {
-  Link2,
-  X,
-  Plus,
-  Loader2,
-} from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
+import { Link2, X, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
 import {
   Popover,
   PopoverContent,
@@ -17,36 +13,56 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-import { availableConnectors, type Connector } from "./connectors-data"
+import {
+  availableConnectors,
+  connectorApiKeyMap,
+  type Connector,
+} from "./connectors-data"
 import { ConnectorDetailModal } from "./connector-detail-modal"
 import { ConnectorsDialog } from "./connectors-dialog"
 import { ConnectorLogo } from "./connector-logo"
+import {
+  getDefaultConnectorStatuses,
+  openConnectorConnectUrl,
+  useConnectorsStatusQuery,
+} from "@/apis/connectors/list"
 
-interface ConnectorsPanelProps {
-  selectedConnectors: string[]
-}
-
-export function ConnectorsPanel({
-  selectedConnectors,
-}: ConnectorsPanelProps) {
+export function ConnectorsPanel() {
   const [open, setOpen] = useState(false)
   const [isConnectorsDialogOpen, setIsConnectorsDialogOpen] = useState(false)
   const [selectedConnector, setSelectedConnector] = useState<Connector | null>(
     null
   )
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [pendingConnectorId, setPendingConnectorId] = useState<string | null>(
-    null
+  const { data, refetch } = useConnectorsStatusQuery()
+
+  const connectorStatuses = useMemo(
+    () => ({
+      ...getDefaultConnectorStatuses(),
+      ...(data?.connectors ?? {}),
+    }),
+    [data?.connectors]
   )
-  const connectTimerRef = useRef<number | null>(null)
+
+  const connectors = useMemo<Connector[]>(
+    () =>
+      availableConnectors.map((connector) => {
+        const apiKey = connectorApiKeyMap[connector.id]
+
+        return {
+          ...connector,
+          status:
+            apiKey && connectorStatuses[apiKey] ? "connected" : "disconnected",
+        }
+      }),
+    [connectorStatuses]
+  )
 
   useEffect(() => {
-    return () => {
-      if (connectTimerRef.current) {
-        window.clearTimeout(connectTimerRef.current)
-      }
+    if (open) {
+      void refetch()
     }
-  }, [])
+  }, [open, refetch])
 
   const handleConnectorClick = (connector: Connector) => {
     if (connector.status !== "install") {
@@ -62,25 +78,15 @@ export function ConnectorsPanel({
   }
 
   const handleConnect = (id: string) => {
-    if (pendingConnectorId) return
+    const connector = availableConnectors.find((item) => item.id === id) ?? null
+    const apiKey = connector ? connectorApiKeyMap[connector.id] : null
 
-    if (connectTimerRef.current) {
-      window.clearTimeout(connectTimerRef.current)
-    }
+    if (!apiKey) return
 
-    setPendingConnectorId(id)
-    connectTimerRef.current = window.setTimeout(() => {
-      const connector = availableConnectors.find((item) => item.id === id) ?? null
-
-      if (connector) {
-        setSelectedConnector(connector)
-        setIsModalOpen(true)
-      }
-
-      setPendingConnectorId(null)
-      setOpen(false)
-      connectTimerRef.current = null
-    }, 650)
+    openConnectorConnectUrl(apiKey)
+    setOpen(false)
+    setIsModalOpen(false)
+    setSelectedConnector(null)
   }
 
   return (
@@ -120,7 +126,7 @@ export function ConnectorsPanel({
             </Button>
           </div>
           <div className="scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent max-h-64 overflow-y-auto py-0.5">
-            {availableConnectors.map((connector) => (
+            {connectors.map((connector) => (
               <div
                 key={connector.id}
                 className="flex items-center justify-between px-3 py-1.5 transition-colors hover:bg-accent/40"
@@ -135,7 +141,7 @@ export function ConnectorsPanel({
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-1">
-                      <span className="truncate text-[12px] font-medium leading-none">
+                      <span className="truncate text-[12px] leading-none font-medium">
                         {connector.name}
                       </span>
                       {connector.beta ? (
@@ -147,45 +153,38 @@ export function ConnectorsPanel({
                   </div>
                 </button>
 
-                <Button
-                  type="button"
-                  variant={
-                    selectedConnectors.includes(connector.id)
-                      ? "secondary"
-                      : "ghost"
-                  }
-                  size="xs"
-                  className={cn(
-                    "h-6 rounded-full px-2 text-[8px] font-medium",
-                    connector.status === "install"
-                      ? "text-chart-4"
-                      : selectedConnectors.includes(connector.id)
-                        ? "bg-primary/10 text-primary hover:bg-primary/15"
-                        : "text-muted-foreground"
+                <div className="flex items-center gap-2">
+                  {/* Show BUTTON only if NOT connected */}
+                  {connector.status !== "connected" && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="xs"
+                      className={cn(
+                        "h-6 rounded-full px-2 text-[8px] font-medium",
+                        connector.status === "install"
+                          ? "text-chart-4"
+                          : "text-muted-foreground"
+                      )}
+                      disabled={connector.status === "install"}
+                      onClick={() =>
+                        connector.status === "disconnected" &&
+                        handleConnect(connector.id)
+                      }
+                    >
+                      {connector.status === "install" ? "Install" : "Connect"}
+                    </Button>
                   )}
-                  disabled={
-                    connector.status === "install" ||
-                    selectedConnectors.includes(connector.id) ||
-                    pendingConnectorId === connector.id
-                  }
-                  onClick={() =>
-                    connector.status === "disconnected" &&
-                    handleConnect(connector.id)
-                  }
-                >
-                  {pendingConnectorId === connector.id ? (
-                    <>
-                      <Loader2 className="mr-1 size-2 animate-spin" />
-                      Loading
-                    </>
-                  ) : connector.status === "install" ? (
-                    "Install"
-                  ) : selectedConnectors.includes(connector.id) ? (
-                    "Connected"
-                  ) : (
-                    "Connect"
+
+                  {/* Show SWITCH only if connected */}
+                  {connector.status === "connected" && (
+                    <Switch
+                      checked
+                      disabled
+                      className="scale-[0.7] !opacity-100"
+                    />
                   )}
-                </Button>
+                </div>
               </div>
             ))}
           </div>

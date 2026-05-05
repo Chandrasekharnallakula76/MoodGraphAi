@@ -180,7 +180,10 @@ type ParsedEmailReply = {
 
 function parseEmailReply(text: string): ParsedEmailReply | null {
   const normalized = text.trim()
-  if (!/^#\s*Email Reply/i.test(normalized) && !/^\s*Subject:/im.test(normalized)) {
+  if (
+    !/^#\s*Email Reply/i.test(normalized) &&
+    !/^\s*Subject:/im.test(normalized)
+  ) {
     return null
   }
 
@@ -194,7 +197,9 @@ function parseEmailReply(text: string): ParsedEmailReply | null {
 
   const subject = lines[subjectIndex].replace(/^Subject:\s*/i, "").trim()
   const contentLines = lines.slice(subjectIndex + 1)
-  const firstBodyIndex = contentLines.findIndex((line) => line.trim().length > 0)
+  const firstBodyIndex = contentLines.findIndex(
+    (line) => line.trim().length > 0
+  )
   if (firstBodyIndex === -1) return null
 
   const greeting = contentLines[firstBodyIndex].trim()
@@ -279,7 +284,7 @@ function EmailReplyPreview({ text }: { text: string }) {
             <Mail className="size-4" />
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
               Email draft
             </p>
             <h3 className="truncate text-sm font-semibold text-foreground">
@@ -322,7 +327,11 @@ function EmailReplyStatus({
   return (
     <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200">
       <p className="font-medium">Approval required</p>
-      {nextStep ? <p className="mt-1 text-amber-900/80 dark:text-amber-200/80">{nextStep}</p> : null}
+      {nextStep ? (
+        <p className="mt-1 text-amber-900/80 dark:text-amber-200/80">
+          {nextStep}
+        </p>
+      ) : null}
     </div>
   )
 }
@@ -337,8 +346,10 @@ function AssistantMessage({
   onCopy?: () => void
 }) {
   const [copied, setCopied] = useState(false)
-  const isEmailList = typeof content === "object" && content.kind === "email_list"
-  const isEmailReply = typeof content === "object" && content.kind === "email_reply"
+  const isEmailList =
+    typeof content === "object" && content.kind === "email_list"
+  const isEmailReply =
+    typeof content === "object" && content.kind === "email_reply"
   const textContent =
     typeof content === "string"
       ? content
@@ -406,7 +417,7 @@ function AssistantMessage({
             {isEmailList ? (
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
                     Email list
                   </p>
                   <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
@@ -498,7 +509,6 @@ function UnifiedInput({
   isLoading?: boolean
 }) {
   const [input, setInput] = useState("")
-  const [selectedConnectors] = useState<string[]>([])
   const isDesignMode = true
 
   const handleSend = () => {
@@ -553,7 +563,7 @@ function UnifiedInput({
         >
           <FileSources />
 
-          <ConnectorsPanel selectedConnectors={selectedConnectors} />
+          <ConnectorsPanel />
 
           <MyComputerModal />
         </div>
