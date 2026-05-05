@@ -3,6 +3,7 @@ import { HashRouter, Navigate, Route, Routes } from "react-router-dom"
 import { ThemeToggle } from "@/components/theme-toggle"
 import RouteLoader from "@/components/ui/route-loader"
 import { isAuthenticated } from "@/lib/auth"
+import AuthToastHost from "@/components/auth-toast-host"
 
 const Newtask = lazy(() => import("@/components/Newtask/Newtask"))
 const RegisterPage = lazy(() => import("@/components/Auth/register-page"))
@@ -93,6 +94,7 @@ export function App() {
           </Routes>
         </Suspense>
         <ThemeToggle />
+        <AuthToastHost />
       </div>
     </HashRouter>
   )

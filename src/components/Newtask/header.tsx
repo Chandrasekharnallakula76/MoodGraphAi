@@ -16,7 +16,7 @@ import {
 } from "lucide-react"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { clearStoredEmail, getStoredEmail } from "@/lib/auth"
+import { clearAuthStorage, getStoredEmail } from "@/lib/auth"
 
 import {
   DropdownMenu,
@@ -237,7 +237,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
   }
 
   const handleLogout = () => {
-    clearStoredEmail()
+    clearAuthStorage()
     navigate("/login", { replace: true })
   }
 

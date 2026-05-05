@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react"
+import axios from "axios"
 import { useNavigate } from "react-router-dom"
 
 import {
@@ -7,6 +8,7 @@ import {
   EyeOff,
   Lock,
   Mail,
+  LoaderCircle,
   Sparkles,
   User,
 } from "lucide-react"
@@ -26,27 +28,126 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
 import { Separator } from "@/components/ui/separator"
-import { setStoredEmail } from "@/lib/auth"
+import { setAuthFlashToast, setStoredEmail, setStoredToken } from "@/lib/auth"
 
 type RegisterPageProps = {
   defaultTab: "register" | "login"
 }
 
+type AuthMode = "register" | "login"
+
+type AuthResponse = {
+  access_token?: string
+  token?: string
+  token_type?: string
+  message?: string
+  detail?: string
+}
+
 const RegisterPage = ({ defaultTab }: RegisterPageProps) => {
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
+  const [submittingMode, setSubmittingMode] = useState<AuthMode | null>(null)
 
-  const handleAuthSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const apiBaseUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, "") ?? ""
+
+  const handleAuthSubmit = async (
+    event: FormEvent<HTMLFormElement>,
+    mode: AuthMode
+  ) => {
     event.preventDefault()
 
     const formData = new FormData(event.currentTarget)
+    const name = String(formData.get("name") ?? "").trim()
     const email = String(formData.get("email") ?? "").trim()
+    const password = String(formData.get("password") ?? "").trim()
 
-    if (email) {
-      setStoredEmail(email)
+    if (!apiBaseUrl) {
+      setAuthFlashToast({
+        kind: "error",
+        message: "API URL is missing in .env",
+      })
+      return
     }
 
-    navigate("/newtask", { replace: true })
+    if (mode === "register" && !name) {
+      setAuthFlashToast({
+        kind: "error",
+        message: "Please enter your user name",
+      })
+      return
+    }
+
+    if (!email || !password) {
+      setAuthFlashToast({
+        kind: "error",
+        message: "Email and password are required",
+      })
+      return
+    }
+
+    setSubmittingMode(mode)
+
+    try {
+      const payload =
+        mode === "register"
+          ? { username: name, email, password }
+          : { email, password }
+
+      const { data } = await axios.post<AuthResponse>(
+        `${apiBaseUrl}/auth/${mode}`,
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+
+      if (mode === "register") {
+        setAuthFlashToast({
+          kind: "success",
+          message: "Account created successfully",
+        })
+        return
+      }
+
+      const token = data.access_token ?? data.token
+
+      if (token) {
+        setStoredToken(token)
+      }
+
+      setStoredEmail(email)
+
+      setAuthFlashToast({
+        kind: "success",
+        message: "Logged in successfully",
+      })
+
+      navigate("/newtask", { replace: true })
+    } catch (error) {
+      let message = "Request failed"
+
+      if (
+        axios.isAxiosError(error) &&
+        typeof error.response?.data === "object" &&
+        error.response?.data !== null
+      ) {
+        if ("detail" in error.response.data) {
+          message = String(error.response.data.detail)
+        } else if ("message" in error.response.data) {
+          message = String(error.response.data.message)
+        }
+      }
+
+      setAuthFlashToast({
+        kind: "error",
+        message,
+      })
+    } finally {
+      setSubmittingMode(null)
+    }
   }
 
   return (
@@ -120,7 +221,10 @@ const RegisterPage = ({ defaultTab }: RegisterPageProps) => {
                 </TabsList>
 
                 <TabsContent value="register" className="mt-5">
-                  <form className="space-y-4" onSubmit={handleAuthSubmit}>
+                  <form
+                    className="space-y-4"
+                    onSubmit={(event) => handleAuthSubmit(event, "register")}
+                  >
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div className="space-y-2 sm:col-span-2">
                         <label
@@ -185,7 +289,7 @@ const RegisterPage = ({ defaultTab }: RegisterPageProps) => {
                             autoComplete="new-password"
                             placeholder="Create a secure password"
                             required
-                            className="h-11 pl-9 pr-10"
+                            className="h-11 pr-10 pl-9"
                           />
 
                           <button
@@ -206,15 +310,31 @@ const RegisterPage = ({ defaultTab }: RegisterPageProps) => {
                       </div>
                     </div>
 
-                    <Button type="submit" className="h-11 w-full gap-2">
-                      Create account
-                      <ArrowRight className="size-4" />
+                    <Button
+                      type="submit"
+                      className="h-11 w-full gap-2"
+                      disabled={submittingMode === "register"}
+                    >
+                      {submittingMode === "register" ? (
+                        <>
+                          <LoaderCircle className="size-4 animate-spin" />
+                          Creating account...
+                        </>
+                      ) : (
+                        <>
+                          Create account
+                          <ArrowRight className="size-4" />
+                        </>
+                      )}
                     </Button>
                   </form>
                 </TabsContent>
 
                 <TabsContent value="login" className="mt-5">
-                  <form className="space-y-4" onSubmit={handleAuthSubmit}>
+                  <form
+                    className="space-y-4"
+                    onSubmit={(event) => handleAuthSubmit(event, "login")}
+                  >
                     <div className="space-y-2">
                       <label
                         htmlFor="login-email"
@@ -256,7 +376,7 @@ const RegisterPage = ({ defaultTab }: RegisterPageProps) => {
                           autoComplete="current-password"
                           placeholder="Enter your password"
                           required
-                          className="h-11 pl-9 pr-10"
+                          className="h-11 pr-10 pl-9"
                         />
 
                         <button
@@ -293,9 +413,22 @@ const RegisterPage = ({ defaultTab }: RegisterPageProps) => {
                       </button>
                     </div>
 
-                    <Button type="submit" className="h-11 w-full gap-2">
-                      Login
-                      <ArrowRight className="size-4" />
+                    <Button
+                      type="submit"
+                      className="h-11 w-full gap-2"
+                      disabled={submittingMode === "login"}
+                    >
+                      {submittingMode === "login" ? (
+                        <>
+                          <LoaderCircle className="size-4 animate-spin" />
+                          Logging in...
+                        </>
+                      ) : (
+                        <>
+                          Login
+                          <ArrowRight className="size-4" />
+                        </>
+                      )}
                     </Button>
                   </form>
                 </TabsContent>

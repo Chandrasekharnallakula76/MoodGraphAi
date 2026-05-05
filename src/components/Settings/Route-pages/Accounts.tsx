@@ -17,7 +17,7 @@ import {
   CalendarDays,
   ChevronLeft,
 } from "lucide-react"
-import { clearStoredEmail, getStoredEmail } from "@/lib/auth"
+import { clearAuthStorage, getStoredEmail } from "@/lib/auth"
 
 const Accounts = () => {
   const navigate = useNavigate()
@@ -38,7 +38,7 @@ const Accounts = () => {
   }
 
   const handleLogout = () => {
-    clearStoredEmail()
+    clearAuthStorage()
     navigate("/login", { replace: true })
   }
 
