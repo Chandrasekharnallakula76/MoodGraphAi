@@ -35,6 +35,8 @@ import {
   formatGitHubProfileCopyText,
   formatGitHubRepoListCopyText,
 } from "@/components/Newtask/github-repo-utils"
+import { CalendarEventPreview } from "@/components/Newtask/calendar/calendar-event-preview"
+import { formatCalendarEventCopyText } from "@/components/Newtask/calendar/calendar-utils"
 import { sendChatMessage } from "@/apis/chat"
 import type { ChatAssistantResponse, ChatEmailItem } from "@/apis/chat"
 import {
@@ -362,6 +364,8 @@ function AssistantMessage({
     typeof content === "object" && content.kind === "github_repo_list"
   const isGitHubProfile =
     typeof content === "object" && content.kind === "github_profile"
+  const isCalendarEvent =
+    typeof content === "object" && content.kind === "calendar_event"
   const textContent =
     typeof content === "string"
       ? content
@@ -391,6 +395,10 @@ function AssistantMessage({
 
     if (content.kind === "github_profile") {
       return formatGitHubProfileCopyText(content.profile, content.action)
+    }
+
+    if (content.kind === "calendar_event") {
+      return formatCalendarEventCopyText(content.event)
     }
 
     return ""
@@ -492,6 +500,11 @@ function AssistantMessage({
             ) : isGitHubProfile ? (
               <GitHubProfilePreview
                 profile={content.profile}
+                action={content.action}
+              />
+            ) : isCalendarEvent ? (
+              <CalendarEventPreview
+                event={content.event}
                 action={content.action}
               />
             ) : (

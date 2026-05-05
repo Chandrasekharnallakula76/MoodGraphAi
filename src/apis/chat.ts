@@ -36,6 +36,15 @@ export type ChatGitHubProfile = {
   profile_url: string
 }
 
+export type ChatCalendarEvent = {
+  event_id: string
+  title: string
+  start: {
+    dateTime: string
+    timeZone?: string | null
+  }
+}
+
 type RawChatObject = Record<string, unknown>
 
 export type ChatAssistantResponse =
@@ -62,6 +71,11 @@ export type ChatAssistantResponse =
       kind: "github_profile"
       action?: string
       profile: ChatGitHubProfile
+    }
+  | {
+      kind: "calendar_event"
+      action?: string
+      event: ChatCalendarEvent
     }
 
 const chatClient = axios.create({
@@ -127,6 +141,21 @@ function isGitHubProfile(value: unknown): value is ChatGitHubProfile {
     typeof item.followers === "number" &&
     typeof item.following === "number" &&
     typeof item.profile_url === "string"
+  )
+}
+
+function isCalendarEvent(value: unknown): value is ChatCalendarEvent {
+  if (!value || typeof value !== "object") return false
+
+  const item = value as RawChatObject
+  const start = item.start as RawChatObject | undefined
+
+  return (
+    typeof item.event_id === "string" &&
+    typeof item.title === "string" &&
+    !!start &&
+    typeof start.dateTime === "string" &&
+    (typeof start.timeZone === "string" || start.timeZone === null || typeof start.timeZone === "undefined")
   )
 }
 
@@ -245,6 +274,31 @@ function extractChatContent(data: unknown): ChatAssistantResponse {
             ? normalizeString(item.language)
             : item.language,
       })),
+    }
+  }
+
+  if (
+    response.type === "calendar" &&
+    isCalendarEvent(response.data)
+  ) {
+    return {
+      kind: "calendar_event",
+      action:
+        typeof response.action === "string" && response.action.trim()
+          ? response.action
+          : undefined,
+      event: {
+        ...response.data,
+        title: normalizeString(response.data.title),
+        event_id: normalizeString(response.data.event_id),
+        start: {
+          dateTime: normalizeString(response.data.start.dateTime),
+          timeZone:
+            typeof response.data.start.timeZone === "string"
+              ? normalizeString(response.data.start.timeZone)
+              : response.data.start.timeZone ?? undefined,
+        },
+      },
     }
   }
 
