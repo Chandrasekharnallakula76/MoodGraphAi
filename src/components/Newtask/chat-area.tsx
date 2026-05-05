@@ -27,6 +27,14 @@ import { cn } from "@/lib/utils"
 import { ConnectorsPanel } from "@/components/Newtask/connectors-panel"
 import { FileSources } from "@/components/Newtask/file-sources"
 import { MyComputerModal } from "@/components/Newtask/my-computer-modal"
+import {
+  GitHubProfilePreview,
+  GitHubRepoListPreview,
+} from "@/components/Newtask/github-repo-list"
+import {
+  formatGitHubProfileCopyText,
+  formatGitHubRepoListCopyText,
+} from "@/components/Newtask/github-repo-utils"
 import { sendChatMessage } from "@/apis/chat"
 import type { ChatAssistantResponse, ChatEmailItem } from "@/apis/chat"
 import {
@@ -350,6 +358,10 @@ function AssistantMessage({
     typeof content === "object" && content.kind === "email_list"
   const isEmailReply =
     typeof content === "object" && content.kind === "email_reply"
+  const isGitHubRepoList =
+    typeof content === "object" && content.kind === "github_repo_list"
+  const isGitHubProfile =
+    typeof content === "object" && content.kind === "github_profile"
   const textContent =
     typeof content === "string"
       ? content
@@ -358,6 +370,31 @@ function AssistantMessage({
         : content.kind === "email_reply"
           ? content.reply
           : ""
+
+  const getCopyText = () => {
+    if (typeof content === "string") return content
+    if (content.kind === "text") return content.text
+    if (content.kind === "email_reply") return content.reply
+
+    if (content.kind === "email_list") {
+      return content.emails
+        .map(
+          (email) =>
+            `${email.index}. ${email.subject}\nFrom: ${email.from}\nDate: ${formatEmailDate(email.date)}\n${email.snippet}`
+        )
+        .join("\n\n")
+    }
+
+    if (content.kind === "github_repo_list") {
+      return formatGitHubRepoListCopyText(content.repositories, content.action)
+    }
+
+    if (content.kind === "github_profile") {
+      return formatGitHubProfileCopyText(content.profile, content.action)
+    }
+
+    return ""
+  }
 
   const handleCopy = async () => {
     if (onCopy) {
@@ -368,21 +405,7 @@ function AssistantMessage({
     if (!navigator.clipboard?.writeText) return
 
     try {
-      const copyText =
-        typeof content === "string"
-          ? content
-          : content.kind === "text"
-            ? content.text
-            : content.kind === "email_reply"
-              ? content.reply
-              : content.emails
-                  .map(
-                    (email) =>
-                      `${email.index}. ${email.subject}\nFrom: ${email.from}\nDate: ${formatEmailDate(email.date)}\n${email.snippet}`
-                  )
-                  .join("\n\n")
-
-      await navigator.clipboard.writeText(copyText)
+      await navigator.clipboard.writeText(getCopyText())
       setCopied(true)
       window.setTimeout(() => setCopied(false), 1500)
     } catch {
@@ -461,6 +484,16 @@ function AssistantMessage({
                   ))}
                 </div>
               </div>
+            ) : isGitHubRepoList ? (
+              <GitHubRepoListPreview
+                repositories={content.repositories}
+                action={content.action}
+              />
+            ) : isGitHubProfile ? (
+              <GitHubProfilePreview
+                profile={content.profile}
+                action={content.action}
+              />
             ) : (
               <div
                 className={cn(
