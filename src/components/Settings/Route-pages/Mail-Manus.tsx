@@ -161,7 +161,9 @@ const MailManus = () => {
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent className="rounded-2xl sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Editar la dirección de correo de MoodGraph</DialogTitle>
+            <DialogTitle>
+              Editar la dirección de correo de MoodGraph
+            </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
@@ -219,8 +221,8 @@ const MailManus = () => {
               <label className="text-sm font-medium">Instrucciones</label>
 
               <p className="text-xs text-muted-foreground">
-                Los correos enviados a nallakulasekhar9999174-@moodgraph.bot crearán
-                tareas con la siguiente indicación.
+                Los correos enviados a nallakulasekhar9999174-@moodgraph.bot
+                crearán tareas con la siguiente indicación.
               </p>
 
               <Textarea

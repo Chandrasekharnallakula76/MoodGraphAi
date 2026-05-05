@@ -5,14 +5,14 @@ import { useTheme } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 
 const appearanceOptions = [
-  { key: "light", label: "Claro" },
-  { key: "dark", label: "Oscuro" },
-  { key: "system", label: "Seguir sistema" },
+  { key: "light", label: "Light" },
+  { key: "dark", label: "Dark" },
+  // { key: "system", label: "Follow System" },
 ] as const
 
 const Settings = () => {
   const { theme, setTheme } = useTheme()
-  const [language, setLanguage] = useState("es")
+  const [language, setLanguage] = useState("en")
   const [productUpdates, setProductUpdates] = useState(true)
   const [queueEmail, setQueueEmail] = useState(true)
 
@@ -27,9 +27,7 @@ const Settings = () => {
           onChange={(e) => setLanguage(e.target.value)}
           className="h-9 w-[220px] rounded-lg border border-input bg-card px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40"
         >
-          <option value="es">Espanol</option>
           <option value="en">English</option>
-          <option value="hi">Hindi</option>
         </select>
       </section>
 

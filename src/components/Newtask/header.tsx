@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { clearStoredEmail, getStoredEmail } from "@/lib/auth"
 
 import {
   DropdownMenu,
@@ -47,6 +48,9 @@ type ActionClusterProps = {
 }
 
 function ProfileMenu({ compact = false, onLogout }: ProfileMenuProps) {
+  const email = getStoredEmail() ?? "nallakulasekhar9999@gmail.com"
+  const name = email.split("@")[0] || "Chandrasekhar"
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -72,10 +76,8 @@ function ProfileMenu({ compact = false, onLogout }: ProfileMenuProps) {
       <DropdownMenuContent align="end" className="w-64 text-xs">
         <DropdownMenuLabel>
           <div className="flex flex-col">
-            <span className="text-xs font-medium">Chandrasekhar</span>
-            <span className="text-[11px] text-muted-foreground">
-              nallakulasekhar9999@gmail.com
-            </span>
+            <span className="text-xs font-medium">{name}</span>
+            <span className="text-[11px] text-muted-foreground">{email}</span>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -235,6 +237,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
   }
 
   const handleLogout = () => {
+    clearStoredEmail()
     navigate("/login", { replace: true })
   }
 

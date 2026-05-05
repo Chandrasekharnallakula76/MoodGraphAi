@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
 import { Separator } from "@/components/ui/separator"
+import { setStoredEmail } from "@/lib/auth"
 
 type RegisterPageProps = {
   defaultTab: "register" | "login"
@@ -37,6 +38,14 @@ const RegisterPage = ({ defaultTab }: RegisterPageProps) => {
 
   const handleAuthSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+
+    const formData = new FormData(event.currentTarget)
+    const email = String(formData.get("email") ?? "").trim()
+
+    if (email) {
+      setStoredEmail(email)
+    }
+
     navigate("/newtask", { replace: true })
   }
 

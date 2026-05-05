@@ -1,10 +1,31 @@
-import { lazy, Suspense } from "react"
+import { lazy, Suspense, type ReactNode } from "react"
 import { HashRouter, Navigate, Route, Routes } from "react-router-dom"
 import { ThemeToggle } from "@/components/theme-toggle"
 import RouteLoader from "@/components/ui/route-loader"
+import { isAuthenticated } from "@/lib/auth"
 
 const Newtask = lazy(() => import("@/components/Newtask/Newtask"))
 const RegisterPage = lazy(() => import("@/components/Auth/register-page"))
+
+function RequireAuth({ children }: { children: ReactNode }) {
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" replace />
+  }
+
+  return children
+}
+
+function RedirectByAuth() {
+  return <Navigate to={isAuthenticated() ? "/newtask" : "/login"} replace />
+}
+
+function PublicRoute({ children }: { children: ReactNode }) {
+  if (isAuthenticated()) {
+    return <Navigate to="/newtask" replace />
+  }
+
+  return children
+}
 
 export function App() {
   return (
@@ -12,20 +33,63 @@ export function App() {
       <div className="flex h-screen w-full overflow-hidden bg-background">
         <Suspense fallback={<RouteLoader label="Loading workspace" />}>
           <Routes>
-            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/" element={<RedirectByAuth />} />
             <Route
               path="/register"
-              element={<RegisterPage defaultTab="register" />}
+              element={
+                <PublicRoute>
+                  <RegisterPage defaultTab="register" />
+                </PublicRoute>
+              }
             />
             <Route
               path="/login"
-              element={<RegisterPage defaultTab="login" />}
+              element={
+                <PublicRoute>
+                  <RegisterPage defaultTab="login" />
+                </PublicRoute>
+              }
             />
-            <Route path="/newtask" element={<Newtask />} />
-            <Route path="/agents" element={<Newtask />} />
-            <Route path="/buscar" element={<Newtask />} />
-            <Route path="/biblioteca" element={<Newtask />} />
-            <Route path="*" element={<Newtask />} />
+            <Route
+              path="/newtask"
+              element={
+                <RequireAuth>
+                  <Newtask />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/agents"
+              element={
+                <RequireAuth>
+                  <Newtask />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/buscar"
+              element={
+                <RequireAuth>
+                  <Newtask />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/biblioteca"
+              element={
+                <RequireAuth>
+                  <Newtask />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="*"
+              element={
+                <RequireAuth>
+                  <Newtask />
+                </RequireAuth>
+              }
+            />
           </Routes>
         </Suspense>
         <ThemeToggle />

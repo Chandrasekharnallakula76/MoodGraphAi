@@ -1,4 +1,5 @@
 import { useRef, useState, type ChangeEvent } from "react"
+import { useNavigate } from "react-router-dom"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -16,14 +17,16 @@ import {
   CalendarDays,
   ChevronLeft,
 } from "lucide-react"
+import { clearStoredEmail, getStoredEmail } from "@/lib/auth"
 
 const Accounts = () => {
+  const navigate = useNavigate()
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
   const [name, setName] = useState("Chandrasekhar Nallakula")
   const [avatarUrl, setAvatarUrl] = useState<string>("")
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const email = "nallakulasekhar9999@gmail.com"
+  const email = getStoredEmail() ?? "nallakulasekhar9999@gmail.com"
   const userId = "310519663549404832"
   const initial = name.trim().charAt(0).toUpperCase() || "C"
 
@@ -32,6 +35,11 @@ const Accounts = () => {
     if (!file) return
     const objectUrl = URL.createObjectURL(file)
     setAvatarUrl(objectUrl)
+  }
+
+  const handleLogout = () => {
+    clearStoredEmail()
+    navigate("/login", { replace: true })
   }
 
   return (
@@ -160,6 +168,7 @@ const Accounts = () => {
                   <Button
                     size="icon"
                     className="bg-red-900/25 text-red-400 hover:bg-red-900/40"
+                    onClick={handleLogout}
                   >
                     <LogOut className="h-4 w-4" />
                   </Button>
