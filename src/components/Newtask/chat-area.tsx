@@ -28,17 +28,24 @@ import { ConnectorsPanel } from "@/components/Newtask/connectors-panel"
 import { FileSources } from "@/components/Newtask/file-sources"
 import { MyComputerModal } from "@/components/Newtask/my-computer-modal"
 import { sendChatMessage } from "@/apis/chat"
+import type { ChatAssistantResponse, ChatEmailItem } from "@/apis/chat"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-interface Message {
-  id: string
-  role: "user" | "assistant"
-  content: string
-}
+type Message =
+  | {
+      id: string
+      role: "user"
+      content: string
+    }
+  | {
+      id: string
+      role: "assistant"
+      content: string | ChatAssistantResponse
+    }
 
 type SuggestionCard = {
   icon: typeof FileText
@@ -150,17 +157,176 @@ function UserMessage({ content }: { content: string }) {
   )
 }
 
+function formatEmailDate(dateString: string) {
+  const date = new Date(dateString)
+  if (Number.isNaN(date.getTime())) {
+    return dateString
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date)
+}
+
+type ParsedEmailReply = {
+  subject: string
+  greeting: string
+  body: string[]
+  closing: string
+  signature: string[]
+}
+
+function parseEmailReply(text: string): ParsedEmailReply | null {
+  const normalized = text.trim()
+  if (!/^#\s*Email Reply/i.test(normalized) && !/^\s*Subject:/im.test(normalized)) {
+    return null
+  }
+
+  const lines = normalized
+    .replace(/^#\s*Email Reply\s*/i, "")
+    .split(/\r?\n/)
+    .map((line) => line.trimEnd())
+
+  const subjectIndex = lines.findIndex((line) => /^Subject:/i.test(line.trim()))
+  if (subjectIndex === -1) return null
+
+  const subject = lines[subjectIndex].replace(/^Subject:\s*/i, "").trim()
+  const contentLines = lines.slice(subjectIndex + 1)
+  const firstBodyIndex = contentLines.findIndex((line) => line.trim().length > 0)
+  if (firstBodyIndex === -1) return null
+
+  const greeting = contentLines[firstBodyIndex].trim()
+  const remainder = contentLines.slice(firstBodyIndex + 1)
+
+  const closingIndex = remainder.findIndex((line) =>
+    /^(best regards|regards|sincerely|kind regards|warm regards)/i.test(
+      line.trim()
+    )
+  )
+
+  const bodySource =
+    closingIndex === -1 ? remainder : remainder.slice(0, closingIndex)
+
+  const body = bodySource
+    .join("\n")
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+
+  const closing =
+    closingIndex === -1 ? "Best regards," : remainder[closingIndex].trim()
+  const signature =
+    closingIndex === -1
+      ? []
+      : remainder
+          .slice(closingIndex + 1)
+          .map((line) => line.trim())
+          .filter(Boolean)
+
+  return {
+    subject,
+    greeting,
+    body,
+    closing,
+    signature,
+  }
+}
+
+function EmailReplyPreview({ text }: { text: string }) {
+  const parsed = parseEmailReply(text)
+
+  if (!parsed) {
+    return (
+      <div className="space-y-1.5">
+        {text.split("\n").map((line, i) => {
+          const trimmedLine = line.trim()
+
+          if (trimmedLine === "") {
+            return <div key={i} className="h-2" />
+          }
+
+          const numberedMatch = trimmedLine.match(/^(\d+)\.\s*(.+)$/)
+          if (numberedMatch) {
+            return (
+              <div key={i} className="flex gap-2">
+                <span className="min-w-5 text-sm font-semibold text-foreground">
+                  {numberedMatch[1]}.
+                </span>
+                <p className="text-sm leading-relaxed text-foreground/90">
+                  {numberedMatch[2]}
+                </p>
+              </div>
+            )
+          }
+
+          return (
+            <p key={i} className="text-[15px] leading-6 text-foreground/90">
+              {trimmedLine}
+            </p>
+          )
+        })}
+      </div>
+    )
+  }
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border/70 bg-background shadow-sm">
+      <div className="border-b border-border/70 bg-muted/40 px-4 py-3">
+        <div className="flex items-center gap-2">
+          <div className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <Mail className="size-4" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              Email draft
+            </p>
+            <h3 className="truncate text-sm font-semibold text-foreground">
+              {parsed.subject}
+            </h3>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-5 px-4 py-4">
+        <div className="space-y-2 text-sm leading-6 text-foreground/90">
+          <p className="font-medium text-foreground">{parsed.greeting}</p>
+          {parsed.body.map((paragraph, index) => (
+            <p key={index}>{paragraph}</p>
+          ))}
+        </div>
+
+        <div className="space-y-1 border-l-2 border-primary/20 pl-4 text-sm leading-6">
+          <p className="font-medium text-foreground">{parsed.closing}</p>
+          {parsed.signature.map((line, index) => (
+            <p key={index} className="text-muted-foreground">
+              {line}
+            </p>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function AssistantMessage({
   content,
   isPending = false,
   onCopy,
 }: {
-  content: string
+  content: string | ChatAssistantResponse
   isPending?: boolean
   onCopy?: () => void
 }) {
   const [copied, setCopied] = useState(false)
-  const lines = content.split("\n")
+  const isEmailList = typeof content === "object" && content.kind === "email_list"
+  const textContent =
+    typeof content === "string"
+      ? content
+      : content.kind === "text"
+        ? content.text
+        : ""
 
   const handleCopy = async () => {
     if (onCopy) {
@@ -171,7 +337,19 @@ function AssistantMessage({
     if (!navigator.clipboard?.writeText) return
 
     try {
-      await navigator.clipboard.writeText(content)
+      const copyText =
+        typeof content === "string"
+          ? content
+          : content.kind === "text"
+            ? content.text
+            : content.emails
+                .map(
+                  (email) =>
+                    `${email.index}. ${email.subject}\nFrom: ${email.from}\nDate: ${formatEmailDate(email.date)}\n${email.snippet}`
+                )
+                .join("\n\n")
+
+      await navigator.clipboard.writeText(copyText)
       setCopied(true)
       window.setTimeout(() => setCopied(false), 1500)
     } catch {
@@ -203,43 +381,62 @@ function AssistantMessage({
           </div>
 
           <div className="px-4 py-3">
-            <div
-              className={cn(
-                "space-y-1.5",
-                isPending && "animate-pulse text-muted-foreground"
-              )}
-            >
-              {lines.map((line, i) => {
-                const trimmedLine = line.trim()
+            {isEmailList ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                    Email list
+                  </p>
+                  <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                    {content.emails.length} results
+                  </span>
+                </div>
 
-                if (trimmedLine === "") {
-                  return <div key={i} className="h-2" />
-                }
+                <div className="space-y-3">
+                  {content.emails.map((email: ChatEmailItem) => (
+                    <div
+                      key={email.id}
+                      className="rounded-2xl border border-border/70 bg-background px-4 py-3 shadow-sm"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full border border-border bg-muted text-[11px] font-semibold text-foreground">
+                              {email.index}
+                            </span>
+                            <h4 className="truncate text-sm font-semibold text-foreground">
+                              {email.subject}
+                            </h4>
+                          </div>
 
-                const numberedMatch = trimmedLine.match(/^(\d+)\.\s*(.+)$/)
-                if (numberedMatch) {
-                  return (
-                    <div key={i} className="flex gap-2">
-                      <span className="min-w-5 text-sm font-semibold text-foreground">
-                        {numberedMatch[1]}.
-                      </span>
-                      <p className="text-sm leading-relaxed text-foreground/90">
-                        {numberedMatch[2]}
+                          <p className="mt-2 text-xs font-medium text-muted-foreground">
+                            From:{" "}
+                            <span className="text-foreground/90">
+                              {email.from}
+                            </span>
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Date: {formatEmailDate(email.date)}
+                          </p>
+                        </div>
+                      </div>
+
+                      <p className="mt-3 line-clamp-3 text-sm leading-6 text-foreground/85">
+                        {email.snippet}
                       </p>
                     </div>
-                  )
-                }
-
-                return (
-                  <p
-                    key={i}
-                    className="text-[15px] leading-6 text-foreground/90"
-                  >
-                    {trimmedLine}
-                  </p>
-                )
-              })}
-            </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div
+                className={cn(
+                  isPending && "animate-pulse text-muted-foreground"
+                )}
+              >
+                <EmailReplyPreview text={textContent} />
+              </div>
+            )}
           </div>
         </div>
 
@@ -425,7 +622,12 @@ export function ChatArea() {
   const [isAtBottom, setIsAtBottom] = useState(true)
   const [showScrollButton, setShowScrollButton] = useState(false)
 
-  const chatMutation = useMutation<string, Error, string, { assistantId: string }>({
+  const chatMutation = useMutation<
+    ChatAssistantResponse,
+    Error,
+    string,
+    { assistantId: string }
+  >({
     mutationFn: async (message) => sendChatMessage(message),
     onMutate: async (message) => {
       const assistantId = createMessageId()
@@ -452,7 +654,7 @@ export function ChatArea() {
 
       setMessages((prev) =>
         prev.map((message) =>
-          message.id === context.assistantId
+          message.role === "assistant" && message.id === context.assistantId
             ? { ...message, content }
             : message
         )
@@ -463,7 +665,7 @@ export function ChatArea() {
 
       setMessages((prev) =>
         prev.map((message) =>
-          message.id === context.assistantId
+          message.role === "assistant" && message.id === context.assistantId
             ? {
                 ...message,
                 content: "Sorry, I couldn't reach the chat service.",
@@ -547,7 +749,10 @@ export function ChatArea() {
               <AssistantMessage
                 key={message.id}
                 content={message.content}
-                isPending={message.content === "Thinking..."}
+                isPending={
+                  typeof message.content === "string" &&
+                  message.content === "Thinking..."
+                }
               />
             )
           )}

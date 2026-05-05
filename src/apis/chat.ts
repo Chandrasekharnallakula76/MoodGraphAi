@@ -3,7 +3,26 @@ import { getStoredToken } from "@/lib/auth"
 
 const apiBaseUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, "") ?? ""
 
-export type ChatApiResponse = unknown
+export type ChatEmailItem = {
+  index: number
+  id: string
+  subject: string
+  from: string
+  date: string
+  snippet: string
+}
+
+type RawChatObject = Record<string, unknown>
+
+export type ChatAssistantResponse =
+  | {
+      kind: "text"
+      text: string
+    }
+  | {
+      kind: "email_list"
+      emails: ChatEmailItem[]
+    }
 
 const chatClient = axios.create({
   baseURL: apiBaseUrl,
@@ -23,16 +42,57 @@ chatClient.interceptors.request.use((config) => {
   return config
 })
 
-function extractChatContent(data: ChatApiResponse): string {
+function decodeHtmlEntities(value: string) {
+  if (typeof document === "undefined") {
+    return value
+  }
+
+  const textarea = document.createElement("textarea")
+  textarea.innerHTML = value
+  return textarea.value
+}
+
+function isEmailItem(value: unknown): value is ChatEmailItem {
+  if (!value || typeof value !== "object") return false
+
+  const item = value as RawChatObject
+  return (
+    typeof item.index === "number" &&
+    typeof item.id === "string" &&
+    typeof item.subject === "string" &&
+    typeof item.from === "string" &&
+    typeof item.date === "string" &&
+    typeof item.snippet === "string"
+  )
+}
+
+function extractChatContent(data: unknown): ChatAssistantResponse {
   if (typeof data === "string") {
-    return data
+    return { kind: "text", text: data }
   }
 
   if (!data || typeof data !== "object") {
-    return "No response received."
+    return { kind: "text", text: "No response received." }
   }
 
-  const response = data as Record<string, unknown>
+  const response = data as RawChatObject
+
+  if (
+    response.type === "email_list" &&
+    Array.isArray(response.data) &&
+    response.data.every(isEmailItem)
+  ) {
+    return {
+      kind: "email_list",
+      emails: response.data.map((item) => ({
+        ...item,
+        subject: decodeHtmlEntities(item.subject),
+        from: decodeHtmlEntities(item.from),
+        snippet: decodeHtmlEntities(item.snippet),
+      })),
+    }
+  }
+
   const candidates = [
     response.response,
     response.message,
@@ -44,18 +104,17 @@ function extractChatContent(data: ChatApiResponse): string {
 
   for (const candidate of candidates) {
     if (typeof candidate === "string" && candidate.trim()) {
-      return candidate
+      return { kind: "text", text: candidate }
     }
   }
 
-  return JSON.stringify(data)
+  return { kind: "text", text: JSON.stringify(data) }
 }
 
 export async function sendChatMessage(message: string) {
-  const { data } = await chatClient.post<ChatApiResponse>("/agent/chat", null, {
+  const { data } = await chatClient.post<unknown>("/agent/chat", null, {
     params: { message },
   })
 
   return extractChatContent(data)
 }
-
