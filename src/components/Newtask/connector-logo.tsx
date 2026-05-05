@@ -3,6 +3,7 @@ import {
   Monitor,
   Globe,
   CalendarDays,
+  CheckSquare,
   type LucideProps,
 } from "lucide-react"
 import type { ComponentType } from "react"
@@ -81,6 +82,9 @@ const connectorLogoMap: Record<string, IconComponent> = {
   "outlook-calendar": CalendarDays,
   calendar: CalendarDays,
   "google-calendar": CalendarDays,
+  "google-tasks": CheckSquare,
+  "google-task": CheckSquare,
+  tasks: CheckSquare,
   "google-drive": Globe,
 }
 

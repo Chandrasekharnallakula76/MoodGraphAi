@@ -25,12 +25,14 @@ const connectorDescriptions: Record<string, string> = {
     "Send, read, and manage emails from your Gmail account directly in MoodGraph.",
   browser:
     "Access your browser data, bookmarks, and history to enhance your workflow.",
+  "google-tasks":
+    "Create, organize, and manage Google Tasks directly from MoodGraph.",
   meta: "Manage Meta Ads campaigns, view analytics, and optimize your advertising directly in MoodGraph.",
   instagram:
     "Schedule posts, view insights, and manage your Instagram presence from MoodGraph.",
   outlook:
     "Send, read, and manage emails from your Outlook account directly in MoodGraph.",
-  gcalendar:
+  "google-calendar":
     "View, create, and manage events in your Google Calendar from MoodGraph.",
   ocalendar:
     "View, create, and manage events in your Outlook Calendar from MoodGraph.",
@@ -88,11 +90,18 @@ const connectorMetadata: Record<
     website: "https://outlook.com",
     privacyPolicy: "https://privacy.microsoft.com",
   },
-  gcalendar: {
+  "google-calendar": {
     type: "App",
     author: "MoodGraph",
     uuid: "gcal-conn-001",
     website: "https://calendar.google.com",
+    privacyPolicy: "https://policies.google.com/privacy",
+  },
+  "google-tasks": {
+    type: "App",
+    author: "MoodGraph",
+    uuid: "gtasks-conn-001",
+    website: "https://tasks.google.com",
     privacyPolicy: "https://policies.google.com/privacy",
   },
   ocalendar: {

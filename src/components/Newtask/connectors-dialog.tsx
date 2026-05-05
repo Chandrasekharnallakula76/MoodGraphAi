@@ -50,22 +50,34 @@ const recommendedApps: ConnectorItem[] = [
 
 const appConnectors: ConnectorItem[] = [
   {
-    id: "browser",
-    name: "Mi navegador",
-    desc: "Accede a la web en tu propio navegador.",
-    tone: "slate",
-  },
-  {
     id: "gmail",
     name: "Gmail",
     desc: "Redacta respuestas y resume conversaciones del correo.",
     tone: "red",
   },
   {
+    id: "github",
+    name: "GitHub",
+    desc: "Conecta repositorios, issues y pull requests.",
+    tone: "slate",
+  },
+  {
     id: "google-calendar",
     name: "Google Calendar",
     desc: "Comprende tu horario y optimiza tu tiempo de manera efectiva.",
     tone: "blue",
+  },
+  {
+    id: "google-tasks",
+    name: "Google Tasks",
+    desc: "Crea y administra tareas desde MoodGraph.",
+    tone: "blue",
+  },
+  {
+    id: "browser",
+    name: "Mi navegador",
+    desc: "Accede a la web en tu propio navegador.",
+    tone: "slate",
   },
   {
     id: "google-drive",

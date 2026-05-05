@@ -17,62 +17,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { availableConnectors, type Connector } from "./connectors-data"
 import { ConnectorDetailModal } from "./connector-detail-modal"
 import { ConnectorsDialog } from "./connectors-dialog"
 import { ConnectorLogo } from "./connector-logo"
-
-export interface Connector {
-  id: string
-  name: string
-  icon: string
-  status: "connected" | "disconnected" | "install"
-  beta?: boolean
-}
-
-export const availableConnectors: Connector[] = [
-  { id: "github", name: "GitHub", icon: "github", status: "disconnected" },
-  { id: "gmail", name: "Gmail", icon: "gmail", status: "disconnected" },
-  { id: "browser", name: "My Browser", icon: "browser", status: "install" },
-  {
-    id: "meta",
-    name: "Meta Ads Manager",
-    icon: "meta",
-    status: "disconnected",
-    beta: true,
-  },
-  {
-    id: "instagram",
-    name: "Instagram",
-    icon: "instagram",
-    status: "disconnected",
-    beta: true,
-  },
-  {
-    id: "instagram-market",
-    name: "Instagram Creator Marketplace",
-    icon: "instagram",
-    status: "disconnected",
-    beta: true,
-  },
-  {
-    id: "outlook",
-    name: "Outlook Mail",
-    icon: "outlook",
-    status: "disconnected",
-  },
-  {
-    id: "gcalendar",
-    name: "Google Calendar",
-    icon: "calendar",
-    status: "disconnected",
-  },
-  {
-    id: "ocalendar",
-    name: "Outlook Calendar",
-    icon: "calendar",
-    status: "disconnected",
-  },
-]
 
 interface ConnectorsPanelProps {
   selectedConnectors: string[]
