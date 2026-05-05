@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react"
+import { useMutation } from "@tanstack/react-query"
 import {
   Mic,
   Copy,
@@ -8,6 +9,8 @@ import {
   Pencil,
   Pause,
   ArrowRight,
+  LoaderCircle,
+  Check,
   FileText,
   Image,
   Headphones,
@@ -24,6 +27,7 @@ import { cn } from "@/lib/utils"
 import { ConnectorsPanel } from "@/components/Newtask/connectors-panel"
 import { FileSources } from "@/components/Newtask/file-sources"
 import { MyComputerModal } from "@/components/Newtask/my-computer-modal"
+import { sendChatMessage } from "@/apis/chat"
 import {
   Tooltip,
   TooltipContent,
@@ -73,11 +77,11 @@ const suggestionCards: SuggestionCard[] = [
 
 function ManusLogoLarge() {
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex size-10 items-center justify-center rounded-xl bg-white">
-        <Layers className="size-6 text-black" />
+    <div className="flex items-center gap-2.5">
+      <div className="flex size-9 items-center justify-center rounded-xl border border-border bg-card shadow-sm">
+        <Layers className="size-5 text-foreground" />
       </div>
-      <span className="text-2xl font-semibold text-foreground">
+      <span className="text-2xl font-semibold tracking-tight text-foreground">
         MoodGraph AI
       </span>
       <span className="rounded-md border border-border bg-muted px-2 py-1 text-sm text-muted-foreground">
@@ -90,13 +94,13 @@ function ManusLogoLarge() {
 function ManusLogo() {
   return (
     <div className="flex items-center gap-2">
-      <div className="flex size-6 items-center justify-center rounded-md bg-white">
-        <Layers className="size-4 text-black" />
+      <div className="flex size-6 items-center justify-center rounded-lg border border-border bg-card shadow-sm">
+        <Layers className="size-3.5 text-foreground" />
       </div>
-      <span className="text-sm font-semibold text-foreground">
+      <span className="text-sm font-semibold tracking-tight text-foreground">
         MoodGraph AI
       </span>
-      <span className="rounded border border-border bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+      <span className="rounded-md border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[11px] font-medium text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
         Lite
       </span>
     </div>
@@ -105,14 +109,7 @@ function ManusLogo() {
 
 function MessageActions() {
   return (
-    <div className="mt-2 flex items-center gap-0.5">
-      <Button
-        variant="ghost"
-        size="icon"
-        className="size-7 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
-      >
-        <Copy className="size-4" />
-      </Button>
+    <div className="mt-2.5 flex items-center gap-0.5">
       <Button
         variant="ghost"
         size="icon"
@@ -142,7 +139,7 @@ function UserMessage({ content }: { content: string }) {
   return (
     <div className="flex justify-end py-4">
       <div className="flex max-w-[80%] items-start gap-3">
-        <div className="rounded-2xl rounded-tr-sm bg-muted px-4 py-3">
+        <div className="rounded-2xl rounded-tr-sm border border-border bg-card px-4 py-3 shadow-sm">
           <p className="text-sm leading-relaxed text-foreground">{content}</p>
         </div>
         <button className="mt-1 text-muted-foreground transition-colors hover:text-foreground">
@@ -153,42 +150,97 @@ function UserMessage({ content }: { content: string }) {
   )
 }
 
-function AssistantMessage({ content }: { content: string }) {
+function AssistantMessage({
+  content,
+  isPending = false,
+  onCopy,
+}: {
+  content: string
+  isPending?: boolean
+  onCopy?: () => void
+}) {
+  const [copied, setCopied] = useState(false)
   const lines = content.split("\n")
+
+  const handleCopy = async () => {
+    if (onCopy) {
+      onCopy()
+      return
+    }
+
+    if (!navigator.clipboard?.writeText) return
+
+    try {
+      await navigator.clipboard.writeText(content)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 1500)
+    } catch {
+      // Keep the UI quiet if clipboard access is blocked.
+    }
+  }
 
   return (
     <div className="py-4">
       <div className="max-w-[85%]">
-        <ManusLogo />
+        <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm shadow-black/5">
+          <div className="flex items-center justify-between gap-4 border-b border-border/70 px-4 py-3">
+            <ManusLogo />
 
-        <div className="mt-3 ml-0.5 space-y-1">
-          {lines.map((line, i) => {
-            const trimmedLine = line.trim()
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-xs"
+              onClick={handleCopy}
+              className="h-8 w-8 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+              aria-label="Copy assistant response"
+            >
+              {copied ? (
+                <Check className="size-3.5 text-emerald-500" />
+              ) : (
+                <Copy className="size-3.5" />
+              )}
+            </Button>
+          </div>
 
-            if (trimmedLine === "") {
-              return <div key={i} className="h-2" />
-            }
+          <div className="px-4 py-3">
+            <div
+              className={cn(
+                "space-y-1.5",
+                isPending && "animate-pulse text-muted-foreground"
+              )}
+            >
+              {lines.map((line, i) => {
+                const trimmedLine = line.trim()
 
-            const numberedMatch = trimmedLine.match(/^(\d+)\.\s*(.+)$/)
-            if (numberedMatch) {
-              return (
-                <div key={i} className="flex gap-2">
-                  <span className="min-w-5 text-sm font-semibold text-foreground">
-                    {numberedMatch[1]}.
-                  </span>
-                  <p className="text-sm leading-relaxed text-foreground/90">
-                    {numberedMatch[2]}
+                if (trimmedLine === "") {
+                  return <div key={i} className="h-2" />
+                }
+
+                const numberedMatch = trimmedLine.match(/^(\d+)\.\s*(.+)$/)
+                if (numberedMatch) {
+                  return (
+                    <div key={i} className="flex gap-2">
+                      <span className="min-w-5 text-sm font-semibold text-foreground">
+                        {numberedMatch[1]}.
+                      </span>
+                      <p className="text-sm leading-relaxed text-foreground/90">
+                        {numberedMatch[2]}
+                      </p>
+                    </div>
+                  )
+                }
+
+                return (
+                  <p
+                    key={i}
+                    className="text-[15px] leading-6 text-foreground/90"
+                  >
+                    {trimmedLine}
                   </p>
-                </div>
-              )
-            }
-
-            return (
-              <p key={i} className="text-sm leading-relaxed text-foreground/90">
-                {trimmedLine}
-              </p>
-            )
-          })}
+                )
+              })}
+            </div>
+          </div>
         </div>
 
         <MessageActions />
@@ -199,32 +251,39 @@ function AssistantMessage({ content }: { content: string }) {
 
 function ContinueNotice() {
   return (
-    <div className="flex items-center gap-2 py-3">
-      <Pause className="size-4 text-chart-4" />
-      <span className="text-sm text-chart-4">
+    <div className="flex items-center gap-2 py-3 text-muted-foreground">
+      <Pause className="size-4" />
+      <span className="text-sm">
         MoodGraph AI will continue working after your reply
       </span>
     </div>
   )
 }
 
+const createMessageId = () =>
+  `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+
 function UnifiedInput({
   mode,
   onSend,
+  isLoading = false,
 }: {
   mode: "landing" | "chat"
   onSend: (message: string) => void
+  isLoading?: boolean
 }) {
   const [input, setInput] = useState("")
   const [selectedConnectors] = useState<string[]>([])
   const isDesignMode = true
 
   const handleSend = () => {
+    if (isLoading) {
+      return
+    }
+
     if (input.trim()) {
       onSend(input)
-      if (mode === "chat") {
-        setInput("")
-      }
+      setInput("")
     }
   }
 
@@ -292,13 +351,17 @@ function UnifiedInput({
             onClick={handleSend}
             className={cn(
               "cursor-pointer rounded-lg transition-all",
-              input.trim()
+              input.trim() && !isLoading
                 ? "bg-primary text-primary-foreground hover:bg-primary/90"
                 : "cursor-not-allowed bg-muted text-muted-foreground"
             )}
-            disabled={!input.trim()}
+            disabled={!input.trim() || isLoading}
           >
-            <ArrowUp className="size-3.5" />
+            {isLoading ? (
+              <LoaderCircle className="size-3.5 animate-spin" />
+            ) : (
+              <ArrowUp className="size-3.5" />
+            )}
           </Button>
         </div>
       </div>
@@ -323,7 +386,8 @@ function UnifiedInput({
               <button
                 key={index}
                 onClick={() => handleSuggestionClick(card.text)}
-                className="group flex items-start gap-3 rounded-xl border border-border bg-card p-3 text-left transition-all hover:border-ring hover:bg-accent/50"
+                disabled={isLoading}
+                className="group flex items-start gap-3 rounded-xl border border-border bg-card p-3 text-left transition-all hover:border-ring hover:bg-accent/50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted group-hover:bg-accent">
                   <card.icon className="size-4 text-muted-foreground" />
@@ -360,6 +424,55 @@ export function ChatArea() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isAtBottom, setIsAtBottom] = useState(true)
   const [showScrollButton, setShowScrollButton] = useState(false)
+
+  const chatMutation = useMutation<string, Error, string, { assistantId: string }>({
+    mutationFn: async (message) => sendChatMessage(message),
+    onMutate: async (message) => {
+      const assistantId = createMessageId()
+
+      setHasStartedChat(true)
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: createMessageId(),
+          role: "user",
+          content: message,
+        },
+        {
+          id: assistantId,
+          role: "assistant",
+          content: "Thinking...",
+        },
+      ])
+
+      return { assistantId }
+    },
+    onSuccess: (content, _message, context) => {
+      if (!context) return
+
+      setMessages((prev) =>
+        prev.map((message) =>
+          message.id === context.assistantId
+            ? { ...message, content }
+            : message
+        )
+      )
+    },
+    onError: (_error, _message, context) => {
+      if (!context) return
+
+      setMessages((prev) =>
+        prev.map((message) =>
+          message.id === context.assistantId
+            ? {
+                ...message,
+                content: "Sorry, I couldn't reach the chat service.",
+              }
+            : message
+        )
+      )
+    },
+  })
 
   // Get viewport element from ScrollArea
   useEffect(() => {
@@ -407,30 +520,18 @@ export function ChatArea() {
       scrollElement.removeEventListener("scroll", checkScrollPosition)
   }, [checkScrollPosition, hasStartedChat])
 
-  const handleStartChat = (firstMessage: string) => {
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: firstMessage,
-    }
-    setMessages([userMessage])
-    setHasStartedChat(true)
-    setIsAtBottom(true)
-  }
-
   const handleSendMessage = (content: string) => {
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content,
-    }
-    setMessages((prev) => [...prev, newMessage])
+    chatMutation.mutate(content)
   }
 
   if (!hasStartedChat) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-background">
-        <UnifiedInput mode="landing" onSend={handleStartChat} />
+        <UnifiedInput
+          mode="landing"
+          onSend={handleSendMessage}
+          isLoading={chatMutation.isPending}
+        />
       </div>
     )
   }
@@ -443,10 +544,14 @@ export function ChatArea() {
             message.role === "user" ? (
               <UserMessage key={message.id} content={message.content} />
             ) : (
-              <AssistantMessage key={message.id} content={message.content} />
+              <AssistantMessage
+                key={message.id}
+                content={message.content}
+                isPending={message.content === "Thinking..."}
+              />
             )
           )}
-          <ContinueNotice />
+          {messages.length === 0 ? <ContinueNotice /> : null}
         </div>
       </ScrollArea>
 
@@ -462,7 +567,11 @@ export function ChatArea() {
       )}
 
       <div className="shrink-0">
-        <UnifiedInput mode="chat" onSend={handleSendMessage} />
+        <UnifiedInput
+          mode="chat"
+          onSend={handleSendMessage}
+          isLoading={chatMutation.isPending}
+        />
       </div>
     </div>
   )
