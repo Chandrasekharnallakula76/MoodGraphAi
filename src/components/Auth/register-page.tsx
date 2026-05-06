@@ -3,7 +3,6 @@ import axios from "axios"
 import { useNavigate } from "react-router-dom"
 
 import {
-  ArrowRight,
   Eye,
   EyeOff,
   Lock,
@@ -321,10 +320,7 @@ const RegisterPage = ({ defaultTab }: RegisterPageProps) => {
                           Creating account...
                         </>
                       ) : (
-                        <>
-                          Create account
-                          <ArrowRight className="size-4" />
-                        </>
+                        <>Create account</>
                       )}
                     </Button>
                   </form>
@@ -424,10 +420,7 @@ const RegisterPage = ({ defaultTab }: RegisterPageProps) => {
                           Logging in...
                         </>
                       ) : (
-                        <>
-                          Login
-                          <ArrowRight className="size-4" />
-                        </>
+                        <>Login</>
                       )}
                     </Button>
                   </form>

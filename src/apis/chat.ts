@@ -45,6 +45,11 @@ export type ChatCalendarEvent = {
   }
 }
 
+export type ChatCalendarSlot = {
+  start: string
+  end: string
+}
+
 type RawChatObject = Record<string, unknown>
 
 export type ChatAssistantResponse =
@@ -76,6 +81,11 @@ export type ChatAssistantResponse =
       kind: "calendar_event"
       action?: string
       event: ChatCalendarEvent
+    }
+  | {
+      kind: "calendar_slots"
+      action?: string
+      slots: ChatCalendarSlot[]
     }
 
 const chatClient = axios.create({
@@ -157,6 +167,13 @@ function isCalendarEvent(value: unknown): value is ChatCalendarEvent {
     typeof start.dateTime === "string" &&
     (typeof start.timeZone === "string" || start.timeZone === null || typeof start.timeZone === "undefined")
   )
+}
+
+function isCalendarSlot(value: unknown): value is ChatCalendarSlot {
+  if (!value || typeof value !== "object") return false
+
+  const item = value as RawChatObject
+  return typeof item.start === "string" && typeof item.end === "string"
 }
 
 function tryParseJson(value: string): unknown {
@@ -299,6 +316,24 @@ function extractChatContent(data: unknown): ChatAssistantResponse {
               : response.data.start.timeZone ?? undefined,
         },
       },
+    }
+  }
+
+  if (
+    response.type === "calendar" &&
+    Array.isArray(response.data) &&
+    response.data.every(isCalendarSlot)
+  ) {
+    return {
+      kind: "calendar_slots",
+      action:
+        typeof response.action === "string" && response.action.trim()
+          ? response.action
+          : undefined,
+      slots: response.data.map((item) => ({
+        start: normalizeString(item.start),
+        end: normalizeString(item.end),
+      })),
     }
   }
 
