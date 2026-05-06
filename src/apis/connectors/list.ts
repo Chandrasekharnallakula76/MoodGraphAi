@@ -6,9 +6,16 @@ const apiBaseUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, "") ?? ""
 
 export type ConnectorKey = "gmail" | "calendar" | "tasks" | "github"
 
+export type ConnectorStatusValue =
+  | boolean
+  | {
+      enabled?: boolean
+      connected?: boolean
+    }
+
 export type ConnectorsResponse = {
   status: "success"
-  connectors: Record<ConnectorKey, boolean>
+  connectors: Record<ConnectorKey, ConnectorStatusValue>
 }
 
 const connectorConnectPathMap: Record<ConnectorKey, string> = {
@@ -70,6 +77,16 @@ export function getDefaultConnectorStatuses(): Record<ConnectorKey, boolean> {
     tasks: false,
     github: false,
   }
+}
+
+export function isConnectorConnected(
+  status: ConnectorStatusValue | undefined
+) {
+  if (typeof status === "boolean") {
+    return status
+  }
+
+  return Boolean(status?.connected ?? status?.enabled)
 }
 
 export function getConnectorConnectUrl(connectorKey: ConnectorKey) {

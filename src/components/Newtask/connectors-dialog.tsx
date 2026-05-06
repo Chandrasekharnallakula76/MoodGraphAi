@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
 import {
   getDefaultConnectorStatuses,
+  isConnectorConnected,
   useConnectorsStatusQuery,
 } from "@/apis/connectors/list"
 import { connectorApiKeyMap } from "./connectors-data"
@@ -242,7 +243,7 @@ export function ConnectorsDialog({
 
   const connectorIsConnected = (connectorId: string) => {
     const apiKey = connectorApiKeyMap[connectorId]
-    return apiKey ? connectorStatuses[apiKey] : false
+    return apiKey ? isConnectorConnected(connectorStatuses[apiKey]) : false
   }
 
   const filteredRecommended = useMemo(() => {

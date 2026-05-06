@@ -23,6 +23,7 @@ import { ConnectorsDialog } from "./connectors-dialog"
 import { ConnectorLogo } from "./connector-logo"
 import {
   getDefaultConnectorStatuses,
+  isConnectorConnected,
   openConnectorConnectUrl,
   useConnectorsStatusQuery,
 } from "@/apis/connectors/list"
@@ -52,7 +53,9 @@ export function ConnectorsPanel() {
         return {
           ...connector,
           status:
-            apiKey && connectorStatuses[apiKey] ? "connected" : "disconnected",
+            apiKey && isConnectorConnected(connectorStatuses[apiKey])
+              ? "connected"
+              : "disconnected",
         }
       }),
     [connectorStatuses]
