@@ -1,5 +1,5 @@
 import axios from "axios"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { getStoredToken } from "@/lib/auth"
 
 const apiBaseUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, "") ?? ""
@@ -79,6 +79,14 @@ export function getDefaultConnectorStatuses(): Record<ConnectorKey, boolean> {
   }
 }
 
+export function isConnectorEnabled(status: ConnectorStatusValue | undefined) {
+  if (typeof status === "boolean") {
+    return status
+  }
+
+  return Boolean(status?.enabled ?? status?.connected)
+}
+
 export function isConnectorConnected(
   status: ConnectorStatusValue | undefined
 ) {
@@ -105,4 +113,22 @@ export function openConnectorConnectUrl(connectorKey: ConnectorKey) {
 
   window.open(url, "_blank", "noopener,noreferrer")
   return true
+}
+
+export async function disconnectConnector(connectorKey: ConnectorKey) {
+  const { data } = await connectorsClient.post<ConnectorsResponse>(
+    `/connectors/disable/${connectorKey}`
+  )
+  return data
+}
+
+export function useDisconnectConnectorMutation() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: disconnectConnector,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["connectors-list"] })
+    },
+  })
 }

@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
 import {
   getDefaultConnectorStatuses,
+  isConnectorEnabled,
   isConnectorConnected,
   useConnectorsStatusQuery,
 } from "@/apis/connectors/list"
@@ -23,6 +24,7 @@ type ConnectorItem = {
   desc: string
   badge?: string
   tone?: string
+  enabled?: boolean
   connected?: boolean
 }
 
@@ -189,13 +191,13 @@ const ConnectorCard = ({ item }: { item: ConnectorItem }) => (
           <span
             className={cn(
               "shrink-0",
-              item.connected ? "text-emerald-700 dark:text-emerald-300" : ""
+              item.enabled ? "text-emerald-700 dark:text-emerald-300" : ""
             )}
           >
-            {item.connected ? (
+            {item.enabled ? (
               <Switch
-                checked
-                disabled
+                checked={Boolean(item.enabled)}
+                disabled={!item.enabled}
                 className="pointer-events-none scale-[0.7] !opacity-100"
               />
             ) : (
@@ -244,6 +246,11 @@ export function ConnectorsDialog({
   const connectorIsConnected = (connectorId: string) => {
     const apiKey = connectorApiKeyMap[connectorId]
     return apiKey ? isConnectorConnected(connectorStatuses[apiKey]) : false
+  }
+
+  const connectorIsEnabled = (connectorId: string) => {
+    const apiKey = connectorApiKeyMap[connectorId]
+    return apiKey ? isConnectorEnabled(connectorStatuses[apiKey]) : false
   }
 
   const filteredRecommended = useMemo(() => {
@@ -339,6 +346,7 @@ export function ConnectorsDialog({
                         key={item.id}
                         item={{
                           ...item,
+                          enabled: connectorIsEnabled(item.id),
                           connected: connectorIsConnected(item.id),
                         }}
                       />
@@ -354,6 +362,7 @@ export function ConnectorsDialog({
                         key={item.id}
                         item={{
                           ...item,
+                          enabled: connectorIsEnabled(item.id),
                           connected: connectorIsConnected(item.id),
                         }}
                       />

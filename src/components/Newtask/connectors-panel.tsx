@@ -3,6 +3,14 @@ import { Link2, X, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -23,10 +31,17 @@ import { ConnectorsDialog } from "./connectors-dialog"
 import { ConnectorLogo } from "./connector-logo"
 import {
   getDefaultConnectorStatuses,
+  isConnectorEnabled,
   isConnectorConnected,
+  useDisconnectConnectorMutation,
   openConnectorConnectUrl,
   useConnectorsStatusQuery,
 } from "@/apis/connectors/list"
+
+type ConnectorViewModel = Connector & {
+  enabled: boolean
+  connected: boolean
+}
 
 export function ConnectorsPanel() {
   const [open, setOpen] = useState(false)
@@ -34,8 +49,11 @@ export function ConnectorsPanel() {
   const [selectedConnector, setSelectedConnector] = useState<Connector | null>(
     null
   )
+  const [disconnectTarget, setDisconnectTarget] =
+    useState<ConnectorViewModel | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { data, refetch } = useConnectorsStatusQuery()
+  const disconnectConnectorMutation = useDisconnectConnectorMutation()
 
   const connectorStatuses = useMemo(
     () => ({
@@ -45,17 +63,22 @@ export function ConnectorsPanel() {
     [data?.connectors]
   )
 
-  const connectors = useMemo<Connector[]>(
+  const connectors = useMemo<ConnectorViewModel[]>(
     () =>
       availableConnectors.map((connector) => {
         const apiKey = connectorApiKeyMap[connector.id]
+        const connected = apiKey
+          ? isConnectorConnected(connectorStatuses[apiKey])
+          : false
+        const enabled = apiKey
+          ? isConnectorEnabled(connectorStatuses[apiKey])
+          : false
 
         return {
           ...connector,
-          status:
-            apiKey && isConnectorConnected(connectorStatuses[apiKey])
-              ? "connected"
-              : "disconnected",
+          connected,
+          enabled,
+          status: connected ? "connected" : "disconnected",
         }
       }),
     [connectorStatuses]
@@ -80,6 +103,10 @@ export function ConnectorsPanel() {
     setSelectedConnector(null)
   }
 
+  const closeDisconnectDialog = () => {
+    setDisconnectTarget(null)
+  }
+
   const handleConnect = (id: string) => {
     const connector = availableConnectors.find((item) => item.id === id) ?? null
     const apiKey = connector ? connectorApiKeyMap[connector.id] : null
@@ -90,6 +117,22 @@ export function ConnectorsPanel() {
     setOpen(false)
     setIsModalOpen(false)
     setSelectedConnector(null)
+  }
+
+  const handleDisconnectRequest = (connector: ConnectorViewModel) => {
+    if (!connector.connected || !connector.enabled) return
+    setDisconnectTarget(connector)
+  }
+
+  const handleConfirmDisconnect = async () => {
+    if (!disconnectTarget) return
+
+    const apiKey = connectorApiKeyMap[disconnectTarget.id]
+    if (!apiKey) return
+
+    await disconnectConnectorMutation.mutateAsync(apiKey)
+    await refetch()
+    closeDisconnectDialog()
   }
 
   return (
@@ -157,8 +200,7 @@ export function ConnectorsPanel() {
                 </button>
 
                 <div className="flex items-center gap-2">
-                  {/* Show BUTTON only if NOT connected */}
-                  {connector.status !== "connected" && (
+                  {!connector.enabled ? (
                     <Button
                       type="button"
                       variant="ghost"
@@ -171,20 +213,24 @@ export function ConnectorsPanel() {
                       )}
                       disabled={connector.status === "install"}
                       onClick={() =>
-                        connector.status === "disconnected" &&
                         handleConnect(connector.id)
                       }
                     >
-                      {connector.status === "install" ? "Install" : "Connect"}
+                      Connect
                     </Button>
-                  )}
-
-                  {/* Show SWITCH only if connected */}
-                  {connector.status === "connected" && (
+                  ) : (
                     <Switch
-                      checked
-                      disabled
+                      checked={connector.enabled}
+                      disabled={
+                        disconnectConnectorMutation.isPending ||
+                        !connector.enabled
+                      }
                       className="scale-[0.7] !opacity-100"
+                      onCheckedChange={(checked) => {
+                        if (!checked) {
+                          handleDisconnectRequest(connector)
+                        }
+                      }}
                     />
                   )}
                 </div>
@@ -223,6 +269,42 @@ export function ConnectorsPanel() {
         onClose={handleCloseModal}
         onConnect={handleConnect}
       />
+
+      <Dialog open={disconnectTarget !== null} onOpenChange={(open) => {
+        if (!open) {
+          closeDisconnectDialog()
+        }
+      }}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Disconnect {disconnectTarget?.name ?? "connector"}?</DialogTitle>
+            <DialogDescription>
+              Turning this off will disconnect the connector from your account.
+              You can reconnect it later from the same menu.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={closeDisconnectDialog}
+              disabled={disconnectConnectorMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => {
+                void handleConfirmDisconnect()
+              }}
+              disabled={disconnectConnectorMutation.isPending}
+            >
+              {disconnectConnectorMutation.isPending ? "Disconnecting..." : "Disconnect"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
