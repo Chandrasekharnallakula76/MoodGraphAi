@@ -1,4 +1,5 @@
 import {
+  ArrowLeft,
   Bell,
   CalendarDays,
   Check,
@@ -15,7 +16,7 @@ import {
   User,
 } from "lucide-react"
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { clearAuthStorage, getStoredEmail } from "@/lib/auth"
 
 import {
@@ -42,6 +43,7 @@ type ProfileMenuProps = {
 
 type ActionClusterProps = {
   compact?: boolean
+  showNotifications?: boolean
   onOpenNotifications: () => void
   onOpenSubscription: () => void
   onLogout: () => void
@@ -50,7 +52,11 @@ type ActionClusterProps = {
 function ProfileMenu({ compact = false, onLogout }: ProfileMenuProps) {
   const email = getStoredEmail() ?? "nallakulasekhar9999@gmail.com"
   const name = email.split("@")[0] || "Chandrasekhar"
-  const initial = (name.trim().charAt(0) || email.trim().charAt(0) || "C").toUpperCase()
+  const initial = (
+    name.trim().charAt(0) ||
+    email.trim().charAt(0) ||
+    "C"
+  ).toUpperCase()
 
   return (
     <DropdownMenu>
@@ -129,6 +135,7 @@ function ProfileMenu({ compact = false, onLogout }: ProfileMenuProps) {
 
 function ActionCluster({
   compact = false,
+  showNotifications = true,
   onOpenNotifications,
   onOpenSubscription,
   onLogout,
@@ -204,19 +211,21 @@ function ActionCluster({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Button
-        variant="ghost"
-        size="icon"
-        className={
-          compact
-            ? "size-8 rounded-full border border-border/70 bg-card text-muted-foreground shadow-sm hover:bg-muted hover:text-foreground"
-            : "size-9 rounded-full border border-border/70 bg-card text-muted-foreground shadow-sm hover:bg-muted hover:text-foreground"
-        }
-        aria-label="Notificaciones"
-        onClick={onOpenNotifications}
-      >
-        <Bell className={compact ? "size-3.5" : "size-4"} />
-      </Button>
+      {showNotifications ? (
+        <Button
+          variant="ghost"
+          size="icon"
+          className={
+            compact
+              ? "size-8 rounded-full border border-border/70 bg-card text-muted-foreground shadow-sm hover:bg-muted hover:text-foreground"
+              : "size-9 rounded-full border border-border/70 bg-card text-muted-foreground shadow-sm hover:bg-muted hover:text-foreground"
+          }
+          aria-label="Notificaciones"
+          onClick={onOpenNotifications}
+        >
+          <Bell className={compact ? "size-3.5" : "size-4"} />
+        </Button>
+      ) : null}
 
       <ProfileMenu compact={compact} onLogout={onLogout} />
     </div>
@@ -228,6 +237,8 @@ export function Header({ onOpenSidebar }: HeaderProps) {
   const [subscriptionDialogOpen, setSubscriptionDialogOpen] = useState(false)
 
   const navigate = useNavigate()
+  const location = useLocation()
+  const isProjectPage = location.pathname.startsWith("/project/new")
 
   const openNotifications = () => {
     navigate("/notificaciones")
@@ -258,6 +269,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
         <div className="min-w-0 flex-1" />
         <ActionCluster
           compact
+          showNotifications={!isProjectPage}
           onOpenNotifications={openNotifications}
           onOpenSubscription={openSubscriptionDialog}
           onLogout={handleLogout}
@@ -265,75 +277,98 @@ export function Header({ onOpenSidebar }: HeaderProps) {
       </div>
 
       <div className="hidden h-11 items-center justify-between px-3 md:flex">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 rounded-md border border-border/80 bg-muted/20 px-3 py-1.5 hover:bg-muted">
-              <span className="text-xs font-medium">{selectedModel}</span>
-              <ChevronDown className="size-3.5 text-muted-foreground" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-72 p-1.5 text-xs">
-            <button
+        <div className="flex items-center gap-2">
+          {isProjectPage ? (
+            <Button
               type="button"
-              onClick={openSubscriptionDialog}
-              className="w-full rounded-lg px-2 py-1.5 text-left hover:bg-muted/60"
+              variant="ghost"
+              size="icon"
+              className="size-8 rounded-[9px] border border-border/70 bg-card text-muted-foreground shadow-sm hover:bg-muted hover:text-foreground"
+              onClick={() => navigate("/newtask")}
+              aria-label="Back to new task"
             >
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="inline-flex items-center gap-1">
-                    <span className="text-xs font-semibold">
-                      Daisy AI Studio 1.6 Max
-                    </span>
-                    <span className="rounded bg-primary/20 px-1 py-0.5 text-[10px] text-primary">
-                      Pro
-                    </span>
+              <ArrowLeft className="size-4" />
+            </Button>
+          ) : null}
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-2 rounded-md border border-border/80 bg-muted/20 px-3 py-1.5 hover:bg-muted">
+                <span className="text-xs font-medium">{selectedModel}</span>
+                <ChevronDown className="size-3.5 text-muted-foreground" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-72 p-1.5 text-xs">
+              <button
+                type="button"
+                onClick={openSubscriptionDialog}
+                className="w-full rounded-lg px-2 py-1.5 text-left hover:bg-muted/60"
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="inline-flex items-center gap-1">
+                      <span className="text-xs font-semibold">
+                        Daisy AI Studio 1.6 Max
+                      </span>
+                      <span className="rounded bg-primary/20 px-1 py-0.5 text-[10px] text-primary">
+                        Pro
+                      </span>
+                    </div>
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      Agente de alto rendimiento disenado para tareas complejas.
+                    </p>
                   </div>
+                  <Check className="size-3.5 text-muted-foreground opacity-0" />
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={openSubscriptionDialog}
+                className="mt-1 w-full rounded-lg px-2 py-1.5 text-left hover:bg-muted/60"
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="inline-flex items-center gap-1">
+                      <span className="text-xs font-semibold">
+                        Daisy AI Studio 1.6
+                      </span>
+                      <span className="rounded bg-primary/20 px-1 py-0.5 text-[10px] text-primary">
+                        Pro
+                      </span>
+                    </div>
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      Agente versatil capaz de realizar la mayoria de las
+                      tareas.
+                    </p>
+                  </div>
+                  <Check className="size-3.5 text-muted-foreground opacity-0" />
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedModel("Daisy AI Studio 1.6 Lite")}
+                className={`mt-1 flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left hover:bg-muted ${
+                  selectedModel === "Daisy AI Studio 1.6 Lite"
+                    ? "bg-muted/60"
+                    : ""
+                }`}
+              >
+                <div>
+                  <p className="text-xs font-semibold">
+                    Daisy AI Studio 1.6 Lite
+                  </p>
                   <p className="mt-1 text-[11px] text-muted-foreground">
-                    Agente de alto rendimiento disenado para tareas complejas.
+                    Un agente ligero para tareas diarias.
                   </p>
                 </div>
-                <Check className="size-3.5 text-muted-foreground opacity-0" />
-              </div>
-            </button>
-            <button
-              type="button"
-              onClick={openSubscriptionDialog}
-              className="mt-1 w-full rounded-lg px-2 py-1.5 text-left hover:bg-muted/60"
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="inline-flex items-center gap-1">
-                    <span className="text-xs font-semibold">Daisy AI Studio 1.6</span>
-                    <span className="rounded bg-primary/20 px-1 py-0.5 text-[10px] text-primary">
-                      Pro
-                    </span>
-                  </div>
-                  <p className="mt-1 text-[11px] text-muted-foreground">
-                    Agente versatil capaz de realizar la mayoria de las tareas.
-                  </p>
-                </div>
-                <Check className="size-3.5 text-muted-foreground opacity-0" />
-              </div>
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedModel("Daisy AI Studio 1.6 Lite")}
-              className={`mt-1 flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left hover:bg-muted ${
-                selectedModel === "Daisy AI Studio 1.6 Lite" ? "bg-muted/60" : ""
-              }`}
-            >
-              <div>
-                <p className="text-xs font-semibold">Daisy AI Studio 1.6 Lite</p>
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  Un agente ligero para tareas diarias.
-                </p>
-              </div>
-              <Check className="size-3.5 text-muted-foreground" />
-            </button>
-          </DropdownMenuContent>
-        </DropdownMenu>
+                <Check className="size-3.5 text-muted-foreground" />
+              </button>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
         <ActionCluster
+          showNotifications={!isProjectPage}
           onOpenNotifications={openNotifications}
           onOpenSubscription={() => setSubscriptionDialogOpen(true)}
           onLogout={handleLogout}

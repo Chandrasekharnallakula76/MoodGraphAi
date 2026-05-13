@@ -155,12 +155,41 @@ function MessageActions() {
   )
 }
 
+function renderInlineMarkdown(text: string) {
+  return text.split(/(\*\*[^*]+\*\*|\*[^*\s][^*]*\*)/g).map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <strong key={index} className="font-semibold">
+          {part.slice(2, -2)}
+        </strong>
+      )
+    }
+
+    if (part.startsWith("*") && part.endsWith("*")) {
+      return (
+        <em key={index} className="italic">
+          {part.slice(1, -1)}
+        </em>
+      )
+    }
+
+    return part
+  })
+}
+
+function getMarkdownHeading(text: string) {
+  const headingMatch = text.match(/^#{1,6}\s+(.+?)(?:\s+#{1,6})?$/)
+  return headingMatch?.[1]?.trim() ?? null
+}
+
 function UserMessage({ content }: { content: string }) {
   return (
     <div className="flex justify-end py-4">
       <div className="flex max-w-[80%] items-start gap-3">
         <div className="rounded-2xl rounded-tr-sm border border-border bg-card px-4 py-3 shadow-sm">
-          <p className="text-sm leading-relaxed text-foreground">{content}</p>
+          <p className="text-sm leading-relaxed text-foreground">
+            {renderInlineMarkdown(content)}
+          </p>
         </div>
         <button className="mt-1 text-muted-foreground transition-colors hover:text-foreground">
           <Pencil className="size-3.5" />
@@ -273,15 +302,27 @@ function EmailReplyPreview({ text }: { text: string }) {
                   {numberedMatch[1]}.
                 </span>
                 <p className="text-sm leading-relaxed text-foreground/90">
-                  {numberedMatch[2]}
+                  {renderInlineMarkdown(numberedMatch[2])}
                 </p>
               </div>
             )
           }
 
+          const heading = getMarkdownHeading(trimmedLine)
+          if (heading) {
+            return (
+              <h3
+                key={i}
+                className="pt-1 text-base leading-6 font-semibold text-foreground"
+              >
+                {renderInlineMarkdown(heading)}
+              </h3>
+            )
+          }
+
           return (
             <p key={i} className="text-[15px] leading-6 text-foreground/90">
-              {trimmedLine}
+              {renderInlineMarkdown(trimmedLine)}
             </p>
           )
         })}
@@ -309,9 +350,11 @@ function EmailReplyPreview({ text }: { text: string }) {
 
       <div className="space-y-5 px-4 py-4">
         <div className="space-y-2 text-sm leading-6 text-foreground/90">
-          <p className="font-medium text-foreground">{parsed.greeting}</p>
+          <p className="font-medium text-foreground">
+            {renderInlineMarkdown(parsed.greeting)}
+          </p>
           {parsed.body.map((paragraph, index) => (
-            <p key={index}>{paragraph}</p>
+            <p key={index}>{renderInlineMarkdown(paragraph)}</p>
           ))}
         </div>
 
@@ -567,10 +610,14 @@ function UnifiedInput({
   mode,
   onSend,
   isLoading = false,
+  showConnectors = true,
+  showSuggestions = true,
 }: {
   mode: "landing" | "chat"
   onSend: (message: string) => void
   isLoading?: boolean
+  showConnectors?: boolean
+  showSuggestions?: boolean
 }) {
   const [input, setInput] = useState("")
   const isDesignMode = true
@@ -627,7 +674,7 @@ function UnifiedInput({
         >
           <FileSources />
 
-          <ConnectorsPanel />
+          {showConnectors ? <ConnectorsPanel /> : null}
 
           <MyComputerModal />
         </div>
@@ -680,29 +727,31 @@ function UnifiedInput({
           <div className="mb-6">{inputBox}</div>
 
           {/* Suggestion Cards */}
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-            {suggestionCards.map((card, index) => (
-              <button
-                key={index}
-                onClick={() => handleSuggestionClick(card.text)}
-                disabled={isLoading}
-                className="group flex items-start gap-3 rounded-xl border border-border bg-card p-3 text-left transition-all hover:border-ring hover:bg-accent/50 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted group-hover:bg-accent">
-                  <card.icon className="size-4 text-muted-foreground" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-foreground">
-                    {card.text}
-                  </p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {card.subtext}
-                  </p>
-                </div>
-                <ArrowRight className="size-4 text-muted-foreground/50 opacity-0 transition-opacity group-hover:opacity-100" />
-              </button>
-            ))}
-          </div>
+          {showSuggestions ? (
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+              {suggestionCards.map((card, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSuggestionClick(card.text)}
+                  disabled={isLoading}
+                  className="group flex items-start gap-3 rounded-xl border border-border bg-card p-3 text-left transition-all hover:border-ring hover:bg-accent/50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted group-hover:bg-accent">
+                    <card.icon className="size-4 text-muted-foreground" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-foreground">
+                      {card.text}
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {card.subtext}
+                    </p>
+                  </div>
+                  <ArrowRight className="size-4 text-muted-foreground/50 opacity-0 transition-opacity group-hover:opacity-100" />
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
       </div>
     )
@@ -716,7 +765,15 @@ function UnifiedInput({
   )
 }
 
-export function ChatArea() {
+type ChatAreaProps = {
+  showConnectors?: boolean
+  showSuggestions?: boolean
+}
+
+export function ChatArea({
+  showConnectors = true,
+  showSuggestions = true,
+}: ChatAreaProps = {}) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const viewportRef = useRef<HTMLDivElement>(null)
   const [hasStartedChat, setHasStartedChat] = useState(false)
@@ -835,6 +892,8 @@ export function ChatArea() {
           mode="landing"
           onSend={handleSendMessage}
           isLoading={chatMutation.isPending}
+          showConnectors={showConnectors}
+          showSuggestions={showSuggestions}
         />
       </div>
     )
@@ -878,6 +937,7 @@ export function ChatArea() {
           mode="chat"
           onSend={handleSendMessage}
           isLoading={chatMutation.isPending}
+          showConnectors={showConnectors}
         />
       </div>
     </div>

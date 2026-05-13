@@ -6,6 +6,9 @@ import { isAuthenticated } from "@/lib/auth"
 import AuthToastHost from "@/components/auth-toast-host"
 
 const Newtask = lazy(() => import("@/components/Newtask/Newtask"))
+const NewProjectPage = lazy(
+  () => import("@/components/Newtask/new-project-page")
+)
 const RegisterPage = lazy(() => import("@/components/Auth/register-page"))
 
 function RequireAuth({ children }: { children: ReactNode }) {
@@ -80,6 +83,14 @@ export function App() {
               element={
                 <RequireAuth>
                   <Newtask />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/project/new"
+              element={
+                <RequireAuth>
+                  <NewProjectPage />
                 </RequireAuth>
               }
             />
