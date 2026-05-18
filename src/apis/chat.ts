@@ -50,6 +50,14 @@ export type ChatCalendarSlot = {
   end: string
 }
 
+export type ChatTaskItem = {
+  index: number
+  task_list: string
+  task_id: string
+  title: string
+  status: string
+}
+
 type RawChatObject = Record<string, unknown>
 
 export type ChatAssistantResponse =
@@ -86,6 +94,10 @@ export type ChatAssistantResponse =
       kind: "calendar_slots"
       action?: string
       slots: ChatCalendarSlot[]
+    }
+  | {
+      kind: "task_list"
+      tasks: ChatTaskItem[]
     }
 
 const chatClient = axios.create({
@@ -176,6 +188,19 @@ function isCalendarSlot(value: unknown): value is ChatCalendarSlot {
   return typeof item.start === "string" && typeof item.end === "string"
 }
 
+function isTaskItem(value: unknown): value is ChatTaskItem {
+  if (!value || typeof value !== "object") return false
+
+  const item = value as RawChatObject
+  return (
+    typeof item.index === "number" &&
+    typeof item.task_list === "string" &&
+    typeof item.task_id === "string" &&
+    typeof item.title === "string" &&
+    typeof item.status === "string"
+  )
+}
+
 function tryParseJson(value: string): unknown {
   const trimmed = value.trim()
   if (
@@ -236,6 +261,23 @@ function extractChatContent(data: unknown): ChatAssistantResponse {
         subject: normalizeString(item.subject),
         from: normalizeString(item.from),
         snippet: normalizeString(item.snippet),
+      })),
+    }
+  }
+
+  if (
+    response.type === "tasks" &&
+    Array.isArray(response.data) &&
+    response.data.every(isTaskItem)
+  ) {
+    return {
+      kind: "task_list",
+      tasks: response.data.map((item) => ({
+        ...item,
+        task_list: normalizeString(item.task_list),
+        task_id: normalizeString(item.task_id),
+        title: normalizeString(item.title),
+        status: normalizeString(item.status),
       })),
     }
   }

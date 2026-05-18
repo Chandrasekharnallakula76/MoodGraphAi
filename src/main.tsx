@@ -12,8 +12,11 @@ const queryClient = new QueryClient()
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <ColorThemeProvider>
+      <ThemeProvider defaultTheme="light" storageKey="daisy-theme">
+        <ColorThemeProvider
+          defaultColorTheme="green"
+          storageKey="daisy-color-theme"
+        >
           <App />
         </ColorThemeProvider>
       </ThemeProvider>

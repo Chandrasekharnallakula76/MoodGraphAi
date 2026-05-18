@@ -39,6 +39,8 @@ const Newtask = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
+  const [chatKey, setChatKey] = useState(0)
+  const [hasActiveChat, setHasActiveChat] = useState(false)
 
   const locationState = location.state as { returnTo?: string } | null
 
@@ -70,6 +72,15 @@ const Newtask = () => {
 
   const handleCloseSearch = () => {
     navigate("/newtask", { replace: true })
+  }
+
+  const handleNewChat = () => {
+    if (activeNav !== "newtask") {
+      navigate("/newtask")
+    }
+
+    setChatKey((key) => key + 1)
+    setHasActiveChat(false)
   }
 
   const isNotificationPage = location.pathname.startsWith("/notificaciones")
@@ -105,7 +116,11 @@ const Newtask = () => {
       {/* Main Content */}
       <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-background">
         {/* Header (fixed height, no scroll) */}
-        <Header onOpenSidebar={() => setIsMobileSidebarOpen(true)} />
+        <Header
+          onOpenSidebar={() => setIsMobileSidebarOpen(true)}
+          showNewChat={activeNav === "newtask" && hasActiveChat}
+          onNewChat={handleNewChat}
+        />
 
         {/* Content Area (SCROLLABLE) */}
         <div className="flex min-h-0 flex-1 overflow-hidden">
@@ -115,7 +130,10 @@ const Newtask = () => {
               {isNotificationPage && <Notifications />}
               {!isNotificationPage && activeNav === "newtask" && (
                 <div className="flex h-full min-h-0">
-                  <ChatArea />
+                  <ChatArea
+                    key={chatKey}
+                    onChatStarted={() => setHasActiveChat(true)}
+                  />
                 </div>
               )}
               {!isNotificationPage && activeNav === "agents" && (

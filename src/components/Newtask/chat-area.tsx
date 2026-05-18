@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react"
+import { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import { useMutation } from "@tanstack/react-query"
 import {
   Mic,
@@ -20,6 +20,10 @@ import {
   ArrowDown,
   Layers,
   ArrowUp,
+  Lock,
+  CheckCircle2,
+  Circle,
+  ListTodo,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -41,7 +45,17 @@ import {
   formatCalendarSlotCopyText,
 } from "@/components/Newtask/calendar/calendar-utils"
 import { sendChatMessage } from "@/apis/chat"
-import type { ChatAssistantResponse, ChatEmailItem } from "@/apis/chat"
+import type {
+  ChatAssistantResponse,
+  ChatEmailItem,
+  ChatTaskItem,
+} from "@/apis/chat"
+import {
+  getDefaultConnectorStatuses,
+  isConnectorConnected,
+  isConnectorEnabled,
+  useConnectorsStatusQuery,
+} from "@/apis/connectors/list"
 import {
   Tooltip,
   TooltipContent,
@@ -61,6 +75,7 @@ type Message =
     }
 
 type SuggestionCard = {
+  id: "writing" | "image" | "audio" | "code" | "data" | "email"
   icon: typeof FileText
   text: string
   subtext: string
@@ -68,32 +83,60 @@ type SuggestionCard = {
 
 const suggestionCards: SuggestionCard[] = [
   {
+    id: "writing",
     icon: FileText,
     text: "Write a story about a time traveler",
     subtext: "Creative writing",
   },
   {
+    id: "image",
     icon: Image,
     text: "Generate a futuristic city skyline",
     subtext: "Image generation",
   },
   {
+    id: "audio",
     icon: Headphones,
     text: "Summarize the latest AI podcast",
     subtext: "Audio summary",
   },
   {
+    id: "code",
     icon: Code,
     text: "Debug this React component",
     subtext: "Code assistance",
   },
   {
+    id: "data",
     icon: BarChart3,
     text: "Analyze Q3 sales data trends",
     subtext: "Data analysis",
   },
-  { icon: Mail, text: "Draft a professional email", subtext: "Email writing" },
+  {
+    id: "email",
+    icon: Mail,
+    text: "Draft a professional email",
+    subtext: "Email writing",
+  },
 ]
+
+const creativeWritingPrompts = [
+  "Write a story about a time traveler",
+  "Write a mystery set in a city where nobody sleeps",
+  "Write a short story about a robot learning kindness",
+  "Write a fantasy scene about a hidden door in a library",
+  "Write a sci-fi story about the last message from Mars",
+  "Write a dramatic story about two friends meeting after 20 years",
+  "Write a funny story about a chef who cannot taste food",
+  "Write an adventure story about a map that changes every night",
+  "Write a ghost story set inside an old train station",
+  "Write a hopeful story about rebuilding a village after a storm",
+]
+
+function getRandomCreativeWritingPrompt() {
+  const index = Math.floor(Math.random() * creativeWritingPrompts.length)
+  return creativeWritingPrompts[index]
+}
 
 function ManusLogoLarge() {
   return (
@@ -392,6 +435,108 @@ function EmailReplyStatus({
   )
 }
 
+function formatTaskStatus(status: string) {
+  return status
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase())
+}
+
+function TaskListPreview({ tasks }: { tasks: ChatTaskItem[] }) {
+  const completedCount = tasks.filter(
+    (task) => task.status === "completed"
+  ).length
+  const pendingCount = tasks.length - completedCount
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <div className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <ListTodo className="size-4" />
+          </div>
+          <div>
+            <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
+              Task list
+            </p>
+            <p className="text-sm font-semibold text-foreground">
+              {tasks.length} tasks
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
+            {completedCount} completed
+          </span>
+          {pendingCount > 0 ? (
+            <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
+              {pendingCount} pending
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        {tasks.map((task) => {
+          const isCompleted = task.status === "completed"
+          const StatusIcon = isCompleted ? CheckCircle2 : Circle
+
+          return (
+            <div
+              key={task.task_id}
+              className="rounded-2xl border border-border/70 bg-background px-4 py-3 shadow-sm"
+            >
+              <div className="flex items-start gap-3">
+                <StatusIcon
+                  className={cn(
+                    "mt-0.5 size-4 shrink-0",
+                    isCompleted
+                      ? "text-emerald-500"
+                      : "text-muted-foreground"
+                  )}
+                />
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full border border-border bg-muted text-[11px] font-semibold text-foreground">
+                      {task.index}
+                    </span>
+                    <h4
+                      className={cn(
+                        "min-w-0 flex-1 text-sm font-semibold text-foreground",
+                        isCompleted && "text-muted-foreground line-through"
+                      )}
+                    >
+                      {task.title}
+                    </h4>
+                  </div>
+
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    <span>{task.task_list}</span>
+                    <span className="text-muted-foreground/50">/</span>
+                    <span
+                      className={cn(
+                        "font-medium",
+                        isCompleted
+                          ? "text-emerald-600 dark:text-emerald-300"
+                          : "text-amber-600 dark:text-amber-300"
+                      )}
+                    >
+                      {formatTaskStatus(task.status)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 function AssistantMessage({
   content,
   isPending = false,
@@ -410,6 +555,8 @@ function AssistantMessage({
     typeof content === "object" && content.kind === "github_repo_list"
   const isGitHubProfile =
     typeof content === "object" && content.kind === "github_profile"
+  const isTaskList =
+    typeof content === "object" && content.kind === "task_list"
   const calendarPreview =
     typeof content === "object"
       ? content.kind === "calendar_slots"
@@ -442,6 +589,15 @@ function AssistantMessage({
         .map(
           (email) =>
             `${email.index}. ${email.subject}\nFrom: ${email.from}\nDate: ${formatEmailDate(email.date)}\n${email.snippet}`
+        )
+        .join("\n\n")
+    }
+
+    if (content.kind === "task_list") {
+      return content.tasks
+        .map(
+          (task) =>
+            `${task.index}. ${task.title}\nList: ${task.task_list}\nStatus: ${formatTaskStatus(task.status)}\nID: ${task.task_id}`
         )
         .join("\n\n")
     }
@@ -553,6 +709,8 @@ function AssistantMessage({
                   ))}
                 </div>
               </div>
+            ) : isTaskList ? (
+              <TaskListPreview tasks={content.tasks} />
             ) : isGitHubRepoList ? (
               <GitHubRepoListPreview
                 repositories={content.repositories}
@@ -612,14 +770,23 @@ function UnifiedInput({
   isLoading = false,
   showConnectors = true,
   showSuggestions = true,
+  isGmailEnabled = false,
+  isCheckingGmail = false,
 }: {
   mode: "landing" | "chat"
   onSend: (message: string) => void
   isLoading?: boolean
   showConnectors?: boolean
   showSuggestions?: boolean
+  isGmailEnabled?: boolean
+  isCheckingGmail?: boolean
 }) {
   const [input, setInput] = useState("")
+  const [suggestionNotice, setSuggestionNotice] = useState<{
+    title: string
+    description: string
+    tone: "locked" | "connect" | "loading"
+  } | null>(null)
   const isDesignMode = true
 
   const handleSend = () => {
@@ -633,8 +800,45 @@ function UnifiedInput({
     }
   }
 
-  const handleSuggestionClick = (text: string) => {
-    onSend(text)
+  const handleSuggestionClick = (card: SuggestionCard) => {
+    if (isLoading) return
+
+    if (card.id === "writing") {
+      setSuggestionNotice(null)
+      onSend(getRandomCreativeWritingPrompt())
+      return
+    }
+
+    if (card.id === "email") {
+      if (isCheckingGmail) {
+        setSuggestionNotice({
+          title: "Checking Gmail connection",
+          description: "Please wait while Daisy confirms your connector status.",
+          tone: "loading",
+        })
+        return
+      }
+
+      if (!isGmailEnabled) {
+        setSuggestionNotice({
+          title: "Turn on Gmail first",
+          description:
+            "Email drafting needs the Gmail connector switch enabled before this chat can start.",
+          tone: "connect",
+        })
+        return
+      }
+
+      setSuggestionNotice(null)
+      onSend(card.text)
+      return
+    }
+
+    setSuggestionNotice({
+      title: "Coming soon",
+      description: `${card.subtext} support is locked for now and will be available soon.`,
+      tone: "locked",
+    })
   }
 
   const inputBox = (
@@ -728,28 +932,71 @@ function UnifiedInput({
 
           {/* Suggestion Cards */}
           {showSuggestions ? (
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-              {suggestionCards.map((card, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleSuggestionClick(card.text)}
-                  disabled={isLoading}
-                  className="group flex items-start gap-3 rounded-xl border border-border bg-card p-3 text-left transition-all hover:border-ring hover:bg-accent/50 disabled:cursor-not-allowed disabled:opacity-60"
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+                {suggestionCards.map((card) => {
+                  const isEmailCard = card.id === "email"
+                  const canOpenChat =
+                    card.id === "writing" || (isEmailCard && isGmailEnabled)
+                  const showSpinner = isEmailCard && isCheckingGmail
+                  const showLock = !canOpenChat && !showSpinner
+
+                  return (
+                    <button
+                      key={card.id}
+                      type="button"
+                      onClick={() => handleSuggestionClick(card)}
+                      disabled={isLoading}
+                      className={cn(
+                        "group flex items-start gap-3 rounded-xl border border-border bg-card p-3 text-left transition-all hover:border-ring hover:bg-accent/50 disabled:cursor-not-allowed disabled:opacity-60",
+                        showLock && "hover:border-border"
+                      )}
+                    >
+                      <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted group-hover:bg-accent">
+                        <card.icon className="size-4 text-muted-foreground" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-foreground">
+                          {card.text}
+                        </p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {card.subtext}
+                        </p>
+                      </div>
+                      {showSpinner ? (
+                        <LoaderCircle className="size-4 shrink-0 animate-spin text-muted-foreground" />
+                      ) : showLock ? (
+                        <Lock className="size-4 shrink-0 text-muted-foreground/60" />
+                      ) : (
+                        <ArrowRight className="size-4 shrink-0 text-muted-foreground/50 opacity-0 transition-opacity group-hover:opacity-100" />
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+
+              {suggestionNotice ? (
+                <div
+                  className={cn(
+                    "flex items-start gap-2 rounded-xl border px-3 py-2 text-left text-xs leading-5",
+                    suggestionNotice.tone === "connect"
+                      ? "border-amber-200 bg-amber-50 text-amber-950 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-100"
+                      : "border-border bg-muted/40 text-muted-foreground"
+                  )}
                 >
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted group-hover:bg-accent">
-                    <card.icon className="size-4 text-muted-foreground" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-foreground">
-                      {card.text}
+                  {suggestionNotice.tone === "loading" ? (
+                    <LoaderCircle className="mt-0.5 size-3.5 shrink-0 animate-spin" />
+                  ) : (
+                    <Lock className="mt-0.5 size-3.5 shrink-0" />
+                  )}
+                  <div>
+                    <p className="font-semibold text-foreground">
+                      {suggestionNotice.title}
                     </p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      {card.subtext}
-                    </p>
+                    <p>{suggestionNotice.description}</p>
                   </div>
-                  <ArrowRight className="size-4 text-muted-foreground/50 opacity-0 transition-opacity group-hover:opacity-100" />
-                </button>
-              ))}
+                </div>
+              ) : null}
             </div>
           ) : null}
         </div>
@@ -768,11 +1015,13 @@ function UnifiedInput({
 type ChatAreaProps = {
   showConnectors?: boolean
   showSuggestions?: boolean
+  onChatStarted?: () => void
 }
 
 export function ChatArea({
   showConnectors = true,
   showSuggestions = true,
+  onChatStarted,
 }: ChatAreaProps = {}) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const viewportRef = useRef<HTMLDivElement>(null)
@@ -780,6 +1029,26 @@ export function ChatArea({
   const [messages, setMessages] = useState<Message[]>([])
   const [isAtBottom, setIsAtBottom] = useState(true)
   const [showScrollButton, setShowScrollButton] = useState(false)
+  const {
+    data: connectorsData,
+    refetch: refetchConnectors,
+    isFetching: isCheckingConnectors,
+  } = useConnectorsStatusQuery()
+
+  const connectorStatuses = useMemo(
+    () => ({
+      ...getDefaultConnectorStatuses(),
+      ...(connectorsData?.connectors ?? {}),
+    }),
+    [connectorsData?.connectors]
+  )
+  const isGmailConnected = isConnectorConnected(connectorStatuses.gmail)
+  const isGmailEnabled =
+    isGmailConnected && isConnectorEnabled(connectorStatuses.gmail)
+
+  useEffect(() => {
+    void refetchConnectors()
+  }, [refetchConnectors])
 
   const chatMutation = useMutation<
     ChatAssistantResponse,
@@ -792,6 +1061,7 @@ export function ChatArea({
       const assistantId = createMessageId()
 
       setHasStartedChat(true)
+      onChatStarted?.()
       setMessages((prev) => [
         ...prev,
         {
@@ -894,6 +1164,8 @@ export function ChatArea({
           isLoading={chatMutation.isPending}
           showConnectors={showConnectors}
           showSuggestions={showSuggestions}
+          isGmailEnabled={isGmailEnabled}
+          isCheckingGmail={isCheckingConnectors}
         />
       </div>
     )

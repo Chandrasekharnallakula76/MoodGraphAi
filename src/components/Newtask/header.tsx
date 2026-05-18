@@ -11,6 +11,7 @@ import {
   Home,
   LogOut,
   Menu,
+  MessageSquarePlus,
   Settings,
   Sparkles,
   User,
@@ -31,9 +32,16 @@ import {
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { SubscriptionPlanDialog } from "@/components/ui/subscription-plan-dialog"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 type HeaderProps = {
   onOpenSidebar?: () => void
+  showNewChat?: boolean
+  onNewChat?: () => void
 }
 
 type ProfileMenuProps = {
@@ -232,7 +240,11 @@ function ActionCluster({
   )
 }
 
-export function Header({ onOpenSidebar }: HeaderProps) {
+export function Header({
+  onOpenSidebar,
+  showNewChat = false,
+  onNewChat,
+}: HeaderProps) {
   const [selectedModel, setSelectedModel] = useState("Daisy AI Studio 1.6 Lite")
   const [subscriptionDialogOpen, setSubscriptionDialogOpen] = useState(false)
 
@@ -365,6 +377,24 @@ export function Header({ onOpenSidebar }: HeaderProps) {
               </button>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {showNewChat ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={onNewChat}
+                  className="size-8 rounded-[9px] border-border/80 bg-card text-muted-foreground shadow-sm hover:bg-muted hover:text-foreground"
+                  aria-label="New chat"
+                >
+                  <MessageSquarePlus className="size-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">New chat</TooltipContent>
+            </Tooltip>
+          ) : null}
         </div>
 
         <ActionCluster
