@@ -201,6 +201,45 @@ function isTaskItem(value: unknown): value is ChatTaskItem {
   )
 }
 
+function isMinimalTaskItem(
+  value: unknown
+): value is Omit<ChatTaskItem, "index" | "task_list"> &
+  Partial<Pick<ChatTaskItem, "index" | "task_list">> {
+  if (!value || typeof value !== "object") return false
+
+  const item = value as RawChatObject
+  return (
+    typeof item.task_id === "string" &&
+    typeof item.title === "string" &&
+    typeof item.status === "string" &&
+    (typeof item.index === "number" || typeof item.index === "undefined") &&
+    (typeof item.task_list === "string" ||
+      typeof item.task_list === "undefined")
+  )
+}
+
+function normalizeTaskItems(value: unknown): ChatTaskItem[] | null {
+  const parsedValue =
+    typeof value === "string" ? tryParseJson(normalizeString(value)) : value
+
+  const items = Array.isArray(parsedValue) ? parsedValue : [parsedValue]
+
+  if (!items.every(isMinimalTaskItem)) {
+    return null
+  }
+
+  return items.map((item, index) => ({
+    index: typeof item.index === "number" ? item.index : index + 1,
+    task_list:
+      typeof item.task_list === "string" && item.task_list.trim()
+        ? normalizeString(item.task_list)
+        : "Tasks",
+    task_id: normalizeString(item.task_id),
+    title: normalizeString(item.title),
+    status: normalizeString(item.status),
+  }))
+}
+
 function tryParseJson(value: string): unknown {
   const trimmed = value.trim()
   if (
@@ -265,20 +304,13 @@ function extractChatContent(data: unknown): ChatAssistantResponse {
     }
   }
 
-  if (
-    response.type === "tasks" &&
-    Array.isArray(response.data) &&
-    response.data.every(isTaskItem)
-  ) {
+  const normalizedTasks =
+    response.type === "tasks" ? normalizeTaskItems(response.data) : null
+
+  if (normalizedTasks) {
     return {
       kind: "task_list",
-      tasks: response.data.map((item) => ({
-        ...item,
-        task_list: normalizeString(item.task_list),
-        task_id: normalizeString(item.task_id),
-        title: normalizeString(item.title),
-        status: normalizeString(item.status),
-      })),
+      tasks: normalizedTasks,
     }
   }
 

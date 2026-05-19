@@ -505,7 +505,7 @@ export function Sidebar({
                             : "hover:bg-muted/50"
                         )}
                       >
-                        {task.status === "completed" ? (
+                        {selectedTask === task.id ? (
                           <CheckCircle2 className="size-4 shrink-0 text-primary" />
                         ) : (
                           <div className="size-4 shrink-0 rounded-full border-2 border-border" />
@@ -516,9 +516,7 @@ export function Sidebar({
                               "truncate text-xs",
                               selectedTask === task.id
                                 ? "text-foreground"
-                                : "text-muted-foreground",
-                              task.status === "completed" &&
-                                "text-muted-foreground/70"
+                                : "text-muted-foreground"
                             )}
                           >
                             {task.title}
