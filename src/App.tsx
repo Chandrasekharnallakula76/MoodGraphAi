@@ -71,7 +71,7 @@ export function App() {
               }
             />
             <Route
-              path="/buscar"
+              path="/search"
               element={
                 <RequireAuth>
                   <Newtask />
@@ -79,7 +79,7 @@ export function App() {
               }
             />
             <Route
-              path="/biblioteca"
+              path="/library"
               element={
                 <RequireAuth>
                   <Newtask />

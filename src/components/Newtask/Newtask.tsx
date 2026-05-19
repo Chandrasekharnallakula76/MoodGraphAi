@@ -22,14 +22,14 @@ type NavKey = "newtask" | "agents" | "search" | "library"
 const navToPath: Record<NavKey, string> = {
   newtask: "/newtask",
   agents: "/agents",
-  search: "/buscar",
-  library: "/biblioteca",
+  search: "/search",
+  library: "/library",
 }
 
 const pathToNav = (pathname: string): NavKey | null => {
   if (pathname.startsWith("/agents")) return "agents"
-  if (pathname.startsWith("/buscar")) return "search"
-  if (pathname.startsWith("/biblioteca")) return "library"
+  if (pathname.startsWith("/search")) return "search"
+  if (pathname.startsWith("/library")) return "library"
   if (pathname.startsWith("/newtask") || pathname === "/") return "newtask"
   if (pathname.startsWith("/settings/")) return null
   return "newtask"

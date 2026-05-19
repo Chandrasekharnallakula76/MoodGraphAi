@@ -421,7 +421,7 @@ export function Sidebar({
             )}
           >
             <Search className="size-4" />
-            Buscar
+            Search
           </button>
           <button
             onClick={() => handleNavigate("library")}
@@ -433,7 +433,7 @@ export function Sidebar({
             )}
           >
             <Library className="size-4" />
-            Biblioteca
+            Library
           </button>
         </div>
 

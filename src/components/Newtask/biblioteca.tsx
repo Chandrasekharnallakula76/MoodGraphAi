@@ -45,7 +45,7 @@ const Biblioteca = () => {
     <div className="flex min-h-full w-full flex-col p-4 md:p-6">
       {/* Header */}
       <div className="mb-4 flex flex-col gap-4 md:mb-6 md:flex-row md:items-center md:justify-between">
-        <h1 className="text-xl font-semibold text-foreground">Biblioteca</h1>
+        <h1 className="text-xl font-semibold text-foreground">Library</h1>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           {/* Search */}
