@@ -145,27 +145,23 @@ export function SubscriptionPlanDialog({
             onValueChange={(value) => setBilling(value as "monthly" | "yearly")}
             className="items-center"
           >
-            <TabsList className="h-auto rounded-xl border border-border/70 bg-secondary/80 p-1 text-xs shadow-sm dark:bg-muted/40">
+            <TabsList className="h-10 rounded-xl border border-border/70 bg-secondary/80 p-1 text-xs shadow-sm">
               <TabsTrigger
                 value="monthly"
-                className="rounded-lg px-4 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm dark:data-[state=active]:bg-background/90"
+                className="rounded-lg px-5 text-[15px] font-medium text-muted-foreground data-[state=active]:text-foreground data-[state=active]:shadow-none"
               >
-                Mensualmente
+                Monthly
               </TabsTrigger>
 
               <TabsTrigger
                 value="yearly"
-                className="rounded-lg px-4 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm dark:data-[state=active]:bg-background/90"
+                className="rounded-lg px-5 text-[15px] font-medium text-muted-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-none dark:data-[state=active]:bg-background/90"
               >
-                Anualmente
+                Annually · Save 17%
               </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
-
-        <p className="text-center text-xs text-muted-foreground">
-          Ahorra 17% con la facturación anual.
-        </p>
 
         {/* Cards */}
         <div className="mt-3 grid grid-cols-1 items-stretch gap-4 md:grid-cols-3">
@@ -205,16 +201,19 @@ export function SubscriptionPlanDialog({
 
                 <CardContent className="flex flex-1 flex-col gap-4 px-1 pt-0">
                   {isSelected || isLoading ? (
-                    <div className="flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition">
+                    <Button
+                      className="h-9 w-full bg-primary text-sm font-medium text-primary-foreground shadow-sm transition hover:bg-primary/90"
+                      disabled
+                    >
                       {isLoading ? (
                         <>
                           <Loader2 className="h-4 w-4 animate-spin" />
-                          Cargando...
+                          Loading...
                         </>
                       ) : (
-                        "Actualizar"
+                        "Upgrade"
                       )}
-                    </div>
+                    </Button>
                   ) : (
                     <Button
                       className="h-9 w-full bg-secondary text-sm text-secondary-foreground transition hover:bg-secondary/80"
@@ -224,7 +223,7 @@ export function SubscriptionPlanDialog({
                         handleSelectPlan(plan.name)
                       }}
                     >
-                      Actualizar
+                      Upgrade
                     </Button>
                   )}
 

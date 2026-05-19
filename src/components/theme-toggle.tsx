@@ -7,7 +7,7 @@ export function ThemeToggle() {
   const { colorTheme, setColorTheme } = useColorTheme()
 
   return (
-    <div className="fixed right-6 bottom-6 z-50 flex flex-col gap-3">
+    <div className="fixed right-4 bottom-6 z-50 flex flex-col gap-3">
       {/* Dark/Light Toggle */}
       <button
         onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
