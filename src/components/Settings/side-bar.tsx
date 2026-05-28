@@ -28,22 +28,22 @@ import CreateAccount from "./createaccount"
 import { cn } from "@/lib/utils"
 
 const menuItems = [
-  { label: "Cuenta", icon: User, path: "/settings/cuenta" },
-  { label: "Configuración", icon: Settings, path: "/settings/configuracion" },
-  { label: "Uso", icon: BarChart3, path: "/settings/uso" },
-  { label: "Tareas programadas", icon: Calendar, path: "/settings/tareas-programadas" },
+  { label: "Profile", icon: User, path: "/settings/profile" },
+  { label: "Settings", icon: Settings, path: "/settings/preferences" },
+  { label: "Usage", icon: BarChart3, path: "/settings/usage" },
+  { label: "Scheduled Tasks", icon: Calendar, path: "/settings/scheduled-tasks" },
   {
-    label: "Correo Daisy AI Studio",
+    label: "Daisy AI Studio Mail",
     icon: Mail,
-    path: "/settings/correo-daisy-ai-studio",
+    path: "/settings/mail",
   },
-  { label: "Controles de datos", icon: Database, path: "/settings/controles-datos" },
-  { label: "Navegador en la nube", icon: Cloud, path: "/settings/navegador-nube" },
-  { label: "Mi computadora", icon: Monitor, path: "/settings/mi-computadora" },
-  { label: "Personalización", icon: Sparkles, path: "/settings/personalizacion" },
-  { label: "Habilidades", icon: Puzzle, path: "/settings/habilidades" },
-  { label: "Conectores", icon: Plug, path: "/settings/conectores" },
-  { label: "Integraciones", icon: Wrench, path: "/settings/integraciones" },
+  { label: "Data Controls", icon: Database, path: "/settings/data-controls" },
+  { label: "Cloud Browser", icon: Cloud, path: "/settings/cloud-browser" },
+  { label: "My Computer", icon: Monitor, path: "/settings/my-computer" },
+  { label: "Personalization", icon: Sparkles, path: "/settings/personalization" },
+  { label: "Skills", icon: Puzzle, path: "/settings/skills" },
+  { label: "Connectors", icon: Plug, path: "/settings/connectors" },
+  { label: "Integrations", icon: Wrench, path: "/settings/integrations" },
 ]
 
 interface SidebarProps {
@@ -137,7 +137,7 @@ const Sidebar = ({ className, onNavigate }: SidebarProps) => {
                 className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
               >
                 <Plus className="size-3.5" />
-                Create a team
+                Create Team
               </button>
             </div>
           </PopoverContent>
@@ -174,7 +174,7 @@ const Sidebar = ({ className, onNavigate }: SidebarProps) => {
         <div className="my-2 border-t border-border" />
         <button className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground">
           <HelpCircle size={15} />
-          <span>Obtener ayuda</span>
+          <span>Help Center</span>
         </button>
       </div>
 

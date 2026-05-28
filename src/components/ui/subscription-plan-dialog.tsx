@@ -29,7 +29,7 @@ export function SubscriptionPlanDialog({
   onOpenChange,
 }: SubscriptionPlanDialogProps) {
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly")
-  const [selectedPlan, setSelectedPlan] = useState("Pro")
+  const [selectedPlan, setSelectedPlan] = useState("Basic")
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
 
   const handleSelectPlan = (planName: string) => {
@@ -46,99 +46,98 @@ export function SubscriptionPlanDialog({
       name: "Basic",
       monthly: 20,
       yearly: 17,
-      desc: "Uso mensual estándar",
+      desc: "Standard monthly usage",
       highlight: false,
       features: [
-        { icon: Clock, text: "300 créditos de actualización diarios" },
-        { icon: Sparkles, text: "4,000 créditos por mes" },
+        { icon: Clock, text: "300 daily refresh credits" },
+        { icon: Sparkles, text: "4,000 credits per month" },
         {
           icon: FlaskConical,
-          text: "Investigación en profundidad para tareas diarias",
+          text: "In-depth research for daily tasks",
         },
         {
           icon: Globe,
-          text: "Sitios web profesionales para resultados estándar",
+          text: "Professional websites for standard results",
         },
         {
           icon: FileText,
-          text: "Presentaciones perspicaces para contenido regular",
+          text: "Insightful presentations for regular content",
         },
-        { icon: Sparkles, text: "Escalado de tareas con investigación amplia" },
-        { icon: FlaskConical, text: "Acceso anticipado a funciones beta" },
-        { icon: CheckCheck, text: "20 tareas concurrentes" },
-        { icon: Calendar, text: "20 tareas programadas" },
+        { icon: Sparkles, text: "Task scaling with broader research" },
+        { icon: FlaskConical, text: "Early access to beta features" },
+        { icon: CheckCheck, text: "20 concurrent tasks" },
+        { icon: Calendar, text: "20 scheduled tasks" },
       ],
     },
     {
       name: "Pro",
       monthly: 40,
       yearly: 34,
-      desc: "Uso mensual personalizable",
+      desc: "Flexible monthly usage",
       highlight: true,
       dropdown: true,
       features: [
-        { icon: Clock, text: "300 créditos de actualización diarios" },
-        { icon: Sparkles, text: "8,000 créditos por mes" },
+        { icon: Clock, text: "300 daily refresh credits" },
+        { icon: Sparkles, text: "8,000 credits per month" },
         {
           icon: FlaskConical,
-          text: "Investigación profunda con uso autoajustado",
+          text: "Advanced research with adaptive usage",
         },
         {
           icon: Globe,
-          text: "Sitios web profesionales para necesidades cambiantes",
+          text: "Professional websites for changing needs",
         },
         {
           icon: FileText,
-          text: "Presentaciones perspicaces para creación constante",
+          text: "Insightful presentations for continuous creation",
         },
         {
           icon: Sparkles,
-          text: "Amplia investigación adaptada a tu plan elegido",
+          text: "Expanded research tailored to your selected plan",
         },
-        { icon: FlaskConical, text: "Acceso anticipado a funciones beta" },
-        { icon: CheckCheck, text: "20 tareas concurrentes" },
-        { icon: Calendar, text: "20 tareas programadas" },
+        { icon: FlaskConical, text: "Early access to beta features" },
+        { icon: CheckCheck, text: "20 concurrent tasks" },
+        { icon: Calendar, text: "20 scheduled tasks" },
       ],
     },
     {
       name: "Enterprise",
       monthly: 200,
       yearly: 167,
-      desc: "Uso extendido para la productividad",
+      desc: "Extended usage for large-scale productivity",
       highlight: false,
       features: [
-        { icon: Clock, text: "300 créditos de actualización diarios" },
-        { icon: Sparkles, text: "40,000 créditos por mes" },
+        { icon: Clock, text: "300 daily refresh credits" },
+        { icon: Sparkles, text: "40,000 credits per month" },
         {
           icon: FlaskConical,
-          text: "Investigación profunda para tareas a gran escala",
+          text: "Advanced research for large-scale work",
         },
-        { icon: Globe, text: "Sitios web profesionales con análisis de datos" },
+        { icon: Globe, text: "Professional websites with data analysis" },
         {
           icon: FileText,
-          text: "Presentaciones perspicaces para producción en lote",
+          text: "Insightful presentations for batch production",
         },
         {
           icon: Sparkles,
-          text: "Amplia investigación para uso intensivo sostenido",
+          text: "Expanded research for sustained high-volume use",
         },
-        { icon: FlaskConical, text: "Acceso anticipado a funciones beta" },
-        { icon: CheckCheck, text: "20 tareas concurrentes" },
-        { icon: Calendar, text: "20 tareas programadas" },
+        { icon: FlaskConical, text: "Early access to beta features" },
+        { icon: CheckCheck, text: "20 concurrent tasks" },
+        { icon: Calendar, text: "20 scheduled tasks" },
       ],
     },
   ]
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="h-[90vh] overflow-y-auto rounded-3xl border border-border bg-background p-6 sm:max-w-6xl">
+      <DialogContent className="h-[90vh] overflow-y-auto rounded-2xl border border-border bg-background p-6 sm:max-w-6xl">
         <DialogHeader className="text-center">
           <DialogTitle className="text-lg font-semibold tracking-tight">
-            Actualiza a Daisy AI Studio Pro
+            Upgrade to Daisy AI Studio Pro
           </DialogTitle>
         </DialogHeader>
 
-        {/* Toggle */}
         <div className="flex justify-center">
           <Tabs
             value={billing}
@@ -157,13 +156,12 @@ export function SubscriptionPlanDialog({
                 value="yearly"
                 className="rounded-lg px-5 text-[15px] font-medium text-muted-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-none dark:data-[state=active]:bg-background/90"
               >
-                Annually · Save 17%
+                Yearly - Save 17%
               </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
 
-        {/* Cards */}
         <div className="mt-3 grid grid-cols-1 items-stretch gap-4 md:grid-cols-3">
           {plans.map((plan, index) => {
             const price = billing === "monthly" ? plan.monthly : plan.yearly
@@ -173,10 +171,18 @@ export function SubscriptionPlanDialog({
             return (
               <Card
                 key={index}
-                className="flex h-full flex-col justify-between rounded-3xl border border-border/70 bg-muted/5 p-4 shadow-sm transition hover:bg-muted/10"
+                className={`flex h-full flex-col justify-between rounded-3xl border p-4 shadow-sm transition ${
+                  isSelected
+                    ? "border-primary/20 bg-[#020606] shadow-[0_0_0_1px_rgba(255,255,255,0.03)]"
+                    : "border-border/70 bg-muted/5 hover:bg-muted/10"
+                }`}
               >
                 <CardHeader className="space-y-3 px-1 pb-0">
-                  <div className="flex items-center justify-between gap-2 text-xs tracking-[0.2em] text-muted-foreground uppercase">
+                  <div
+                    className={`flex items-center justify-between gap-2 text-xs tracking-[0.2em] uppercase ${
+                      isSelected ? "text-cyan-400/90" : "text-muted-foreground"
+                    }`}
+                  >
                     <span>{plan.name}</span>
                     {plan.highlight ? <span>Popular</span> : null}
                   </div>
@@ -186,15 +192,27 @@ export function SubscriptionPlanDialog({
                     aria-live="polite"
                     aria-atomic="true"
                   >
-                    <span className="inline-flex animate-in items-end gap-1 text-2xl font-semibold tabular-nums duration-200 fade-in slide-in-from-bottom-1">
+                    <span
+                      className={`inline-flex animate-in items-end gap-1 text-2xl font-semibold tabular-nums duration-200 fade-in slide-in-from-bottom-1 ${
+                        isSelected ? "text-slate-100" : ""
+                      }`}
+                    >
                       <span>$</span>
                       <span>{price}</span>
                     </span>
-                    <span className="animate-in text-[11px] text-muted-foreground duration-200 fade-in slide-in-from-bottom-1">
-                      {billing === "monthly" ? "/ mes" : "/ año"}
+                    <span
+                      className={`animate-in text-[11px] duration-200 fade-in slide-in-from-bottom-1 ${
+                        isSelected ? "text-cyan-400/80" : "text-muted-foreground"
+                      }`}
+                    >
+                      {billing === "monthly" ? "/ monthly" : "/ yearly"}
                     </span>
                   </div>
-                  <p className="text-xs leading-5 text-muted-foreground">
+                  <p
+                    className={`text-xs leading-5 ${
+                      isSelected ? "text-cyan-300/85" : "text-muted-foreground"
+                    }`}
+                  >
                     {plan.desc}
                   </p>
                 </CardHeader>
@@ -202,7 +220,11 @@ export function SubscriptionPlanDialog({
                 <CardContent className="flex flex-1 flex-col gap-4 px-1 pt-0">
                   {isSelected || isLoading ? (
                     <Button
-                      className="h-9 w-full bg-primary text-sm font-medium text-primary-foreground shadow-sm transition hover:bg-primary/90"
+                      className={`h-10 w-full text-sm font-medium shadow-sm transition ${
+                        isLoading
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-emerald-700 text-black hover:bg-emerald-700"
+                      }`}
                       disabled
                     >
                       {isLoading ? (
@@ -216,7 +238,7 @@ export function SubscriptionPlanDialog({
                     </Button>
                   ) : (
                     <Button
-                      className="h-9 w-full bg-secondary text-sm text-secondary-foreground transition hover:bg-secondary/80"
+                      className="h-10 w-full bg-secondary text-sm text-secondary-foreground transition hover:bg-secondary/80"
                       variant="secondary"
                       onClick={(event) => {
                         event.stopPropagation()
@@ -227,19 +249,26 @@ export function SubscriptionPlanDialog({
                     </Button>
                   )}
 
-                  {/* Dropdown only for Pro */}
                   {plan.dropdown && (
                     <div className="rounded-xl border border-border/80 px-3 py-2 text-xs text-muted-foreground">
-                      8,000 créditos / mes
+                      8,000 credits / monthly
                     </div>
                   )}
 
-                  <ul className="space-y-2 text-xs leading-5 text-muted-foreground">
+                  <ul
+                    className={`space-y-2 text-xs leading-5 ${
+                      isSelected ? "text-cyan-300/85" : "text-muted-foreground"
+                    }`}
+                  >
                     {plan.features.map((feature, i) => {
                       const Icon = feature.icon
                       return (
                         <li key={i} className="flex items-start gap-2">
-                          <Icon className="mt-0.5 h-3.5 w-3.5" />
+                          <Icon
+                            className={`mt-0.5 h-3.5 w-3.5 ${
+                              isSelected ? "text-cyan-400/90" : ""
+                            }`}
+                          />
                           <span>{feature.text}</span>
                         </li>
                       )

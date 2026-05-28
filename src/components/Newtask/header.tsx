@@ -46,6 +46,10 @@ type HeaderProps = {
 
 type ProfileMenuProps = {
   compact?: boolean
+  onOpenSubscription: () => void
+  onOpenProfile: () => void
+  onOpenSettings: () => void
+  onGoHome: () => void
   onLogout?: () => void
 }
 
@@ -54,10 +58,20 @@ type ActionClusterProps = {
   showNotifications?: boolean
   onOpenNotifications: () => void
   onOpenSubscription: () => void
+  onOpenProfile: () => void
+  onOpenSettings: () => void
+  onGoHome: () => void
   onLogout: () => void
 }
 
-function ProfileMenu({ compact = false, onLogout }: ProfileMenuProps) {
+function ProfileMenu({
+  compact = false,
+  onOpenSubscription,
+  onOpenProfile,
+  onOpenSettings,
+  onGoHome,
+  onLogout,
+}: ProfileMenuProps) {
   const email = getStoredEmail() ?? "nallakulasekhar9999@gmail.com"
   const name = email.split("@")[0] || "Chandrasekhar"
   const initial = (
@@ -96,37 +110,40 @@ function ProfileMenu({ compact = false, onLogout }: ProfileMenuProps) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="flex justify-between text-xs">
-          <span>Gratis</span>
-          <span className="text-[11px]">Actualizar</span>
+        <DropdownMenuItem
+          className="flex justify-between text-xs"
+          onClick={onOpenSubscription}
+        >
+          <span>Free</span>
+          <span className="text-[11px]">Upgrade</span>
         </DropdownMenuItem>
         <DropdownMenuItem className="flex justify-between text-xs">
           <div className="flex items-center gap-2">
             <Sparkles className="size-3.5" />
-            Creditos
+            Credits
           </div>
           <span>300</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-xs">
+        <DropdownMenuItem className="text-xs" onClick={onOpenProfile}>
           <User className="mr-2 size-3.5" />
-          Cuenta
+          Profile
         </DropdownMenuItem>
-        <DropdownMenuItem className="text-xs">
+        <DropdownMenuItem className="text-xs" onClick={onOpenSettings}>
           <Settings className="mr-2 size-3.5" />
-          Configuracion
+          Settings
         </DropdownMenuItem>
-        <DropdownMenuItem className="text-xs">
+        <DropdownMenuItem className="text-xs" onClick={onGoHome}>
           <Home className="mr-2 size-3.5" />
-          Pagina principal
+          Home
         </DropdownMenuItem>
         <DropdownMenuItem className="text-xs">
           <HelpCircle className="mr-2 size-3.5" />
-          Obtener ayuda
+          Help Center
         </DropdownMenuItem>
         <DropdownMenuItem className="text-xs">
           <FileText className="mr-2 size-3.5" />
-          Documentos
+          Documents
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
@@ -134,7 +151,7 @@ function ProfileMenu({ compact = false, onLogout }: ProfileMenuProps) {
           onClick={onLogout}
         >
           <LogOut className="mr-2 size-3.5" />
-          Cerrar sesion
+          Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -146,6 +163,9 @@ function ActionCluster({
   showNotifications = true,
   onOpenNotifications,
   onOpenSubscription,
+  onOpenProfile,
+  onOpenSettings,
+  onGoHome,
   onLogout,
 }: ActionClusterProps) {
   return (
@@ -174,13 +194,13 @@ function ActionCluster({
         >
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold">Gratis</p>
+              <p className="text-xs font-semibold">Free</p>
               <Button
                 variant="secondary"
                 className="h-7 rounded-xl px-3 text-[11px] font-semibold"
                 onClick={onOpenSubscription}
               >
-                Actualizar
+                Upgrade
               </Button>
             </div>
             <DropdownMenuSeparator />
@@ -188,31 +208,31 @@ function ActionCluster({
               <div className="flex items-center justify-between">
                 <span className="inline-flex items-center gap-1 text-xs font-semibold">
                   <Sparkles className="size-3.5 text-muted-foreground" />
-                  Creditos
+                  Credits
                   <CircleHelp className="size-3.5 text-muted-foreground" />
                 </span>
                 <span className="text-xs font-semibold">0</span>
               </div>
-              <p className="text-xs text-muted-foreground">Creditos gratis</p>
+              <p className="text-xs text-muted-foreground">Free credits</p>
             </div>
             <div className="space-y-0.5">
               <div className="flex items-center justify-between">
                 <span className="inline-flex items-center gap-1 text-xs font-semibold">
                   <CalendarDays className="size-3.5 text-muted-foreground" />
-                  Creditos de actualizacion diaria
+                  Daily refresh credits
                   <CircleHelp className="size-3.5 text-muted-foreground" />
                 </span>
                 <span className="text-xs font-semibold">300</span>
               </div>
               <p className="text-xs text-muted-foreground">
-                Actualizar a 300 a las 00:30 cada dia
+                Refreshes to 300 every day at 00:30
               </p>
             </div>
             <button
               type="button"
               className="inline-flex cursor-pointer items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
             >
-              Ver uso
+              View usage
               <ChevronRight className="size-3.5" />
             </button>
           </div>
@@ -228,14 +248,21 @@ function ActionCluster({
               ? "size-8 rounded-full border border-border/70 bg-card text-muted-foreground shadow-sm hover:bg-muted hover:text-foreground"
               : "size-9 rounded-full border border-border/70 bg-card text-muted-foreground shadow-sm hover:bg-muted hover:text-foreground"
           }
-          aria-label="Notificaciones"
+          aria-label="Notifications"
           onClick={onOpenNotifications}
         >
           <Bell className={compact ? "size-3.5" : "size-4"} />
         </Button>
       ) : null}
 
-      <ProfileMenu compact={compact} onLogout={onLogout} />
+      <ProfileMenu
+        compact={compact}
+        onOpenSubscription={onOpenSubscription}
+        onOpenProfile={onOpenProfile}
+        onOpenSettings={onOpenSettings}
+        onGoHome={onGoHome}
+        onLogout={onLogout}
+      />
     </div>
   )
 }
@@ -258,6 +285,18 @@ export function Header({
 
   const openSubscriptionDialog = () => {
     setSubscriptionDialogOpen(true)
+  }
+
+  const openProfile = () => {
+    navigate("/settings/profile")
+  }
+
+  const openSettings = () => {
+    navigate("/settings/preferences")
+  }
+
+  const goHome = () => {
+    navigate("/newtask")
   }
 
   const handleLogout = () => {
@@ -284,6 +323,9 @@ export function Header({
           showNotifications={!isProjectPage}
           onOpenNotifications={openNotifications}
           onOpenSubscription={openSubscriptionDialog}
+          onOpenProfile={openProfile}
+          onOpenSettings={openSettings}
+          onGoHome={goHome}
           onLogout={handleLogout}
         />
       </div>
@@ -327,7 +369,7 @@ export function Header({
                       </span>
                     </div>
                     <p className="mt-1 text-[11px] text-muted-foreground">
-                      Agente de alto rendimiento disenado para tareas complejas.
+                      High-performance model for complex tasks.
                     </p>
                   </div>
                   <Check className="size-3.5 text-muted-foreground opacity-0" />
@@ -349,8 +391,7 @@ export function Header({
                       </span>
                     </div>
                     <p className="mt-1 text-[11px] text-muted-foreground">
-                      Agente versatil capaz de realizar la mayoria de las
-                      tareas.
+                      Versatile model for most tasks.
                     </p>
                   </div>
                   <Check className="size-3.5 text-muted-foreground opacity-0" />
@@ -370,7 +411,7 @@ export function Header({
                     Daisy AI Studio 1.6 Lite
                   </p>
                   <p className="mt-1 text-[11px] text-muted-foreground">
-                    Un agente ligero para tareas diarias.
+                    Lightweight model for everyday work.
                   </p>
                 </div>
                 <Check className="size-3.5 text-muted-foreground" />
@@ -400,7 +441,10 @@ export function Header({
         <ActionCluster
           showNotifications={!isProjectPage}
           onOpenNotifications={openNotifications}
-          onOpenSubscription={() => setSubscriptionDialogOpen(true)}
+          onOpenSubscription={openSubscriptionDialog}
+          onOpenProfile={openProfile}
+          onOpenSettings={openSettings}
+          onGoHome={goHome}
           onLogout={handleLogout}
         />
       </div>

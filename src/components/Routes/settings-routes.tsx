@@ -25,29 +25,29 @@ const Settingsroutes = () => {
     <Suspense fallback={<RouteLoader label="Loading settings" />}>
       <Routes>
         {/* Default */}
-        <Route path="/" element={<Navigate to="/settings/cuenta" replace />} />
+        <Route path="/" element={<Navigate to="/settings/profile" replace />} />
 
         {/* Sidebar Routes */}
-        <Route path="/settings/cuenta" element={<Accounts />} />
-        <Route path="/settings/configuracion" element={<Settings />} />
-        <Route path="/settings/uso" element={<Usage />} />
+        <Route path="/settings/profile" element={<Accounts />} />
+        <Route path="/settings/preferences" element={<Settings />} />
+        <Route path="/settings/usage" element={<Usage />} />
         <Route
-          path="/settings/tareas-programadas"
+          path="/settings/scheduled-tasks"
           element={<TareasProgramadas />}
         />
         <Route
-          path="/settings/correo-daisy-ai-studio"
+          path="/settings/mail"
           element={<MailManus />}
         />
-        <Route path="/settings/controles-datos" element={<CorreoManus />} />
-        <Route path="/settings/navegador-nube" element={<CloudBrowser />} />
-        <Route path="/settings/mi-computadora" element={<MyComputer />} />
-        <Route path="/settings/personalizacion" element={<Personalization />} />
-        <Route path="/settings/habilidades" element={<Habilidades />} />
-        <Route path="/settings/conectores" element={<Conectores />} />
-        <Route path="/settings/integraciones" element={<Integrations />} />
+        <Route path="/settings/data-controls" element={<CorreoManus />} />
+        <Route path="/settings/cloud-browser" element={<CloudBrowser />} />
+        <Route path="/settings/my-computer" element={<MyComputer />} />
+        <Route path="/settings/personalization" element={<Personalization />} />
+        <Route path="/settings/skills" element={<Habilidades />} />
+        <Route path="/settings/connectors" element={<Conectores />} />
+        <Route path="/settings/integrations" element={<Integrations />} />
         {/* Fallback */}
-        <Route path="*" element={<Navigate to="/settings/cuenta" replace />} />
+        <Route path="*" element={<Navigate to="/settings/profile" replace />} />
       </Routes>
     </Suspense>
   )
